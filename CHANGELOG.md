@@ -1,5 +1,8 @@
 # Vita Account Manager - Changelog
 
+## v0.81
+* Extracts IDPS and PSID of console.
+
 ## v0.80
 * First public release
 * Saves, restores and removes PSN/SEN account.
@@ -8,5 +11,4 @@
 
 
 ## To do:
-* Extract PSID and IDPS (if possible).
 * Save and restore WLAN settings.

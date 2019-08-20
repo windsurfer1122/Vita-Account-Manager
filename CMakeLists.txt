@@ -27,7 +27,7 @@ set(VITA_APP_NAME "Vita Account Manager")
 # unique string of developer and Y = a unique number for this app
 set(VITA_TITLEID  "ACTM00003")
 # Optional version string to show in LiveArea's more info screen
-set(VITA_VERSION  "00.80")
+set(VITA_VERSION  "00.81")
 string(REGEX MATCH "[0]*([0-9]+\\..*)"
        VITA_VERSION_APP "${VITA_VERSION}")
 set(VITA_VERSION_APP "${CMAKE_MATCH_1}")
@@ -54,6 +54,7 @@ link_directories(
 # Add all the files needed to compile here
 add_executable(${PROJECT_NAME}
   src/account.c
+  src/console.c
   src/debugScreen.c
   src/file.c
   src/history.c
@@ -75,6 +76,7 @@ target_link_libraries(${PROJECT_NAME}
   SceAppMgr_stub
   SceAppUtil_stub
   ScePower_stub
+  SceVshBridge_stub
 )
 
 ## Create Vita files

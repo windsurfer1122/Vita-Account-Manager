@@ -13,11 +13,12 @@ Switch between multiple PSN/SEN accounts on a PS Vita or PS TV.
   A reboot is still needed to clear execution history in memory.
 * Write-protect execution history files by replacing files with not overwritable directories.
   A reboot is still needed to clear execution history in memory.
+* Save the IDPS and PSID of the console.
 * Uses an extandable coding framework for easy enhancements and/or extensions. Go fork and send [pull requests][11] and/or patches.
 
 ## Details
 * Account data.
-  * Data is stored at `ux0:data/ACTM00003/<username>/`.
+  * Data is stored at `ux0:data/ACTM00003/accounts/<username>/`.
   * Saved files.
     * `tm0:npdrm/act.dat` - PSV game activation data, stored under `tm0/npdrm/act.dat`
     * `tm0:psmdrm/act.dat` - PSM activation data, stored under `tm0/psmdrm/act.dat`
@@ -53,6 +54,10 @@ Switch between multiple PSN/SEN accounts on a PS Vita or PS TV.
      * `vd0:history/data.bak`
      * `vd0:history/data.bin`
   3. Reboot to also clear execution history in memory.
+* Console data.
+  * Data is stored at `ux0:data/ACTM00003/console/`.
+    * `idps.bin` - IDPS of console
+    * `psid.bin` - PSID of console
 
 ## Converting Backups of Other Account Managers
 * AccountManager by ONElua Team ([link][1])

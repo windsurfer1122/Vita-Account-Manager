@@ -21,6 +21,7 @@
 
 #include <main.h>
 #include <account.h>
+#include <console.h>
 #include <file.h>
 #include <history.h>
 
@@ -287,6 +288,7 @@ int main(void)
 				if (execution_history_data.count_protected == 0) { printf("\e[2m"); }
 				printf(" Unprotect execution history files.\e[0K\n"); menu_items++;
 				if (execution_history_data.count_protected == 0) { printf("\e[22m"); }
+				printf(" Save console details.\e[0K\n"); menu_items++;
 			}
 			// last menu item is always exit
 			if (reboot) {
@@ -377,6 +379,9 @@ int main(void)
 					unprotect_execution_history_files(&execution_history_data, "Unprotect Execution History");
 					menu_redraw = true;
 				}
+			} else if (menu_item == 9) {  // save console details
+				save_console_details("Saving console details");
+				menu_redraw = true;
 			}
 		}
 	} while (menu_run);
