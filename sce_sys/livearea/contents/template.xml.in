@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<livearea style="a1" format-ver="01.00" content-rev="1">
+	<livearea-background>
+		<image>bg.png</image>
+	</livearea-background>
+
+	<frame id="frame3" multi="o">
+		<liveitem>
+			<text line-align="center" line-break="on">
+				<str size="64" color="#ffffff" bold="on" shadow="on">${VITA_APP_NAME}
+</str>
+				<str size="18" color="#c0c0c0" bold="on" shadow="on">v${VITA_VERSION_APP} by windsurfer1122</str>
+			</text>
+		</liveitem>
+	</frame>
+</livearea>
