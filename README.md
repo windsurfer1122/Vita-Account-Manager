@@ -17,7 +17,7 @@ Switch between multiple PSN/SEN accounts on a PS Vita or PS TV.
 
 ## Details
 * Account data.
-  * Data is stored at `ux0:data/ACTM00003/`.
+  * Data is stored at `ux0:data/ACTM00003/<username>/`.
   * Saved files.
     * `tm0:npdrm/act.dat` - PSV game activation data, stored under `tm0/npdrm/act.dat`
     * `tm0:psmdrm/act.dat` - PSM activation data, stored under `tm0/psmdrm/act.dat`
@@ -56,7 +56,7 @@ Switch between multiple PSN/SEN accounts on a PS Vita or PS TV.
 
 ## Converting Backups of Other Account Managers
 * AccountManager by ONElua Team ([link][1])
-  * Copy `ux0:pspemu/PSP/SAVEDATA/ACTM00001/<account>` to `ux0:data/ACTM00003/accounts/<account>`.
+  * Copy `ux0:pspemu/PSP/SAVEDATA/ACTM00001/<username>` to `ux0:data/ACTM00003/accounts/<username>`.
   * If `act.dat` exists then create account subdirectories and move file to `tm0/npdrm/act.dat`.
   * If `myprofile.dat` exists then create account subdirectories and move file to `ur0/np/myprofile.dat`.
   * Create account subdirectories `registry/CONFIG/NP` and create the following files:
@@ -64,7 +64,7 @@ Switch between multiple PSN/SEN accounts on a PS Vita or PS TV.
     * `registry/CONFIG/NP/login_id.txt` with e-mail address of PSN/SEN account.
     * `registry/CONFIG/NP/password.txt` with password address of PSN/SEN account.
 * Advanced-Account-Switcher by SiliciaAndPina ([link][2])
-  * Copy `ux0:AdvancedAccountSwitcher/accounts/<account>` to `ux0:data/ACTM00003/accounts/<account>`
+  * Copy `ux0:AdvancedAccountSwitcher/accounts/<username>` to `ux0:data/ACTM00003/accounts/<username>`
   * If `npdrm.dat` exists then create account subdirectories, move and rename file to `tm0/npdrm/act.dat`.
   * If `psmdrm.dat` exists then create account subdirectories, move and rename file to `tm0/psmdrm/act.dat`.
   * Create account subdirectories `registry/CONFIG/NP`, move and rename the following files:
