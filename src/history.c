@@ -26,7 +26,6 @@
 #include <debugScreen.h>
 #define printf psvDebugScreenPrintf
 
-
 struct History_Entry execution_history_entries[] = {
 	{ "ur0:ci/file/", "m.log", false, false, },
 	{ "ur0:user/00/shell/playlog/", "playlod.dat", false, false, },

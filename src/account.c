@@ -24,10 +24,10 @@
 #include <account.h>
 #include <file.h>
 #include <history.h>
+#include <registry.h>
 
 #include <debugScreen.h>
 #define printf psvDebugScreenPrintf
-
 
 struct Dir_Entry {
 	size_t size;
@@ -36,21 +36,12 @@ struct Dir_Entry {
 
 const char *const accounts_folder = "accounts/";
 
-enum {
-	KEY_TYPE_INT=0,
-	KEY_TYPE_STR=1,
-	KEY_TYPE_BIN=2,
-};
-
-#define REG_BUFFER_DEFAULT_SIZE 256
 #define STRING_BUFFER_DEFAULT_SIZE 1024
 
 const char *const reg_config_np = "/CONFIG/NP";
 const char *const reg_config_system = "/CONFIG/SYSTEM";
 const char *const file_reg_config_np = "registry/CONFIG/NP/";
 const char *const file_reg_config_system = "registry/CONFIG/SYSTEM/";
-const char *const file_ext_bin = ".bin";
-const char *const file_ext_txt = ".txt";
 const int reg_id_username = 14;
 const int reg_id_login_id = 258;
 const int reg_id_lang = 271;
@@ -62,19 +53,19 @@ const int reg_id_env = 260;
 
 // values from os0:kd/registry.db0 and https://github.com/devnoname120/RegistryEditorMOD/blob/master/regs.c
 struct Registry_Entry template_reg_user_entries[] = {
-	{ reg_id_username, reg_config_system, file_reg_config_system, "username", KEY_TYPE_STR, 17, NULL, },
-	{ reg_id_login_id, reg_config_np, file_reg_config_np, "login_id", KEY_TYPE_STR, 65, NULL, },
-	{ 257, reg_config_np, file_reg_config_np, "account_id", KEY_TYPE_BIN, 8, NULL, },
-	{ 259, reg_config_np, file_reg_config_np, "password", KEY_TYPE_STR, 31, NULL, },
-	{ reg_id_lang, reg_config_np, file_reg_config_np, "lang", KEY_TYPE_STR, 6, NULL, },
-	{ reg_id_country, reg_config_np, file_reg_config_np, "country", KEY_TYPE_STR, 3, NULL, },
-	{ reg_id_yob, reg_config_np, file_reg_config_np, "yob", KEY_TYPE_INT, 4, NULL, },
-	{ reg_id_mob, reg_config_np, file_reg_config_np, "mob", KEY_TYPE_INT, 4, NULL, },
-	{ reg_id_dob, reg_config_np, file_reg_config_np, "dob", KEY_TYPE_INT, 4, NULL, },
-	{ 275, reg_config_np, file_reg_config_np, "has_subaccount", KEY_TYPE_INT, 4, NULL, },
-	{ 256, reg_config_np, file_reg_config_np, "enable_np", KEY_TYPE_INT, 4, NULL, },
-	{ 269, reg_config_np, file_reg_config_np, "download_confirmed", KEY_TYPE_INT, 4, NULL, },
-	{ reg_id_env, reg_config_np, file_reg_config_np, "env", KEY_TYPE_STR, 17, NULL, },
+	{ reg_id_username, reg_config_system, file_reg_config_system, NULL, "username", KEY_TYPE_STR, 17, NULL, },
+	{ reg_id_login_id, reg_config_np, file_reg_config_np, NULL, "login_id", KEY_TYPE_STR, 65, NULL, },
+	{ 257, reg_config_np, file_reg_config_np, NULL, "account_id", KEY_TYPE_BIN, 8, NULL, },
+	{ 259, reg_config_np, file_reg_config_np, NULL, "password", KEY_TYPE_STR, 31, NULL, },
+	{ reg_id_country, reg_config_np, file_reg_config_np, NULL, "country", KEY_TYPE_STR, 3, NULL, },
+	{ reg_id_lang, reg_config_np, file_reg_config_np, NULL, "lang", KEY_TYPE_STR, 6, NULL, },
+	{ reg_id_dob, reg_config_np, file_reg_config_np, NULL, "dob", KEY_TYPE_INT, 4, NULL, },
+	{ reg_id_mob, reg_config_np, file_reg_config_np, NULL, "mob", KEY_TYPE_INT, 4, NULL, },
+	{ reg_id_yob, reg_config_np, file_reg_config_np, NULL, "yob", KEY_TYPE_INT, 4, NULL, },
+	{ reg_id_env, reg_config_np, file_reg_config_np, NULL, "env", KEY_TYPE_STR, 17, NULL, },
+	{ 275, reg_config_np, file_reg_config_np, NULL, "has_subaccount", KEY_TYPE_INT, 4, NULL, },
+	{ 269, reg_config_np, file_reg_config_np, NULL, "download_confirmed", KEY_TYPE_INT, 4, NULL, },
+	{ 256, reg_config_np, file_reg_config_np, NULL, "enable_np", KEY_TYPE_INT, 4, NULL, },
 };
 
 struct Registry_Data template_reg_user_data = {
@@ -1019,6 +1010,7 @@ void main_account(void)
 	// determine special indexes of registry data
 	template_reg_user_data.idx_username = -1;
 	template_reg_user_data.idx_login_id = -1;
+	template_reg_user_data.idx_ssid = -1;
 	for (i = 0; i < template_reg_user_data.count; i++) {
 		// username
 		if ((template_reg_user_data.idx_username < 0) && (template_reg_user_data.entries[i].key_id == reg_id_username)) {

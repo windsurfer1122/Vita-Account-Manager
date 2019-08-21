@@ -119,6 +119,7 @@ Dump console IDs.
 * Orion for [Vita Toolbox][8]
 * NamelessGhoul0 for [History Wipe Plugin][9]
 * TheFlow for [VitaShell][10]
+* devnoname120 for [RegistryEditor MOD][5]
 
 [1]: https://github.com/ONElua/AccountManager "AccountManager by ONElua Team"
 [2]: https://bitbucket.org/SilicaAndPina/advanced-account-switcher/ "Advanced-Account-Switcher by SiliciaAndPina"

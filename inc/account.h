@@ -21,24 +21,7 @@
 #define __ACCOUNT_H__
 
 #include <stdbool.h> // for bool
-
-struct Registry_Entry {
-	int key_id;
-	const char *const key_path;
-	const char *const key_save_path;
-	const char *const key_name;
-	int key_type;
-	int key_size;
-	void *key_value;
-};
-
-struct Registry_Data {
-	int count;
-	size_t size;
-	int idx_username;
-	int idx_login_id;
-	struct Registry_Entry *entries;
-};
+#include <registry.h> // for Registry_Data
 
 struct File_Entry {
 	const char *const file_path;

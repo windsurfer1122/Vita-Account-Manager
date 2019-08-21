@@ -24,6 +24,7 @@
 #include <console.h>
 #include <file.h>
 #include <history.h>
+#include <wlan.h>
 
 #include <debugScreen.h>
 #define printf psvDebugScreenPrintf
@@ -244,6 +245,7 @@ int main(void)
 	// initialize account data variables and structures
 	if (!is_safe_mode) {
 		main_account();
+		main_wlan();
 
 		// initialize registry initial data
 		init_reg_data(&initial_reg_user_data);

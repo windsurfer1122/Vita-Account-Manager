@@ -59,6 +59,7 @@ add_executable(${PROJECT_NAME}
   src/file.c
   src/history.c
   src/main.c
+  src/registry.c
   src/wlan.c
 )
 target_compile_definitions(${PROJECT_NAME}
