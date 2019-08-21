@@ -1,5 +1,7 @@
 # Vita Account Manager (c) 2019 by "windsurfer1122"
 Switch between multiple PSN/SEN accounts on a PS Vita or PS TV.
+Handle execution history.
+Dump console IDs.
 
 ## Features
 * Save the current account for later restore.
@@ -84,7 +86,31 @@ Switch between multiple PSN/SEN accounts on a PS Vita or PS TV.
 * The saved registry data can be edited by text editors for integer and string values (e.g. [Notepad++][3]) and by hex editors for binary values (e.g. [HxD][4]).
   *No* newlines!
 * For editing the registry directly the tool [Registry Editor MOD by devnoname120][5] is recommended as it also allows to edit binary registry entries.
-* Setting `enable_np` to 0 will retrieve/refresh account details from PSN when logging into PSN and going to PS Store.
+* Console will retrieve/refresh account details from PSN when logging into PSN.
+
+## Registry States during Activation on Vita 3.68
+|Reg Path         |Reg Key                 |No user                    |User Added Only     |User Logged in    |Activated|DRM-Free Demo DL *1|
+|-----------------|------------------------|---------------------------|--------------------|------------------|---------|-------------------|
+|`/CONFIG/NP/`    |`account_id`            |(all hex zeroes)           |**(set from PSN)**  |-                 |-        |-                  |
+|`/CONFIG/NP/`    |`country`               |**(set from intial setup)**|-                   |**(set from PSN)**|-        |-                  |
+|`/CONFIG/NP/`    |`debug`                 |0                          |-                   |-                 |-        |-                  |
+|`/CONFIG/NP/`    |`debug_ingame_commerce2`|0                          |-                   |-                 |-        |-                  |
+|`/CONFIG/NP/`    |`dob`                   |**(set from intial setup)**|-                   |**(set from PSN)**|-        |-                  |
+|`/CONFIG/NP/`    |`download_confirmed`    |0                          |-                   |-                 |-        |**1**              |
+|`/CONFIG/NP/`    |`enable_np`             |0                          |-                   |-                 |-        |**1**              |
+|`/CONFIG/NP/`    |`env`                   |**`np`**                   |-                   |-                 |-        |-                  |
+|`/CONFIG/NP/`    |`has_subaccount`        |0                          |-                   |**(set from PSN)**|-        |-                  |
+|`/CONFIG/NP/`    |`lang`                  |**(set from intial setup)**|-                   |**(set from PSN)**|-        |-                  |
+|`/CONFIG/NP/`    |`login_id`              |(empty string)             |**(set in sign-up)**|-                 |-        |-                  |
+|`/CONFIG/NP/`    |`mob`                   |**(set from intial setup)**|-                   |**(set from PSN)**|-        |-                  |
+|`/CONFIG/NP/`    |`nav_only`              |0                          |-                   |-                 |-        |-                  |
+|`/CONFIG/NP/`    |`np_ad_clock_diff`      |0                          |-                   |-                 |-        |-                  |
+|`/CONFIG/NP/`    |`np_geo_filtering`      |0                          |-                   |-                 |-        |-                  |
+|`/CONFIG/NP/`    |`password`              |(empty string)             |**(set in sign-up)**|-                 |-        |-                  |
+|`/CONFIG/NP/`    |`yob`                   |**(set from intial setup)**|-                   |**(set from PSN)**|-        |-                  |
+|`/CONFIG/SYSTEM/`|`username`              |**`user<NNN>`**            |-                   |-                 |-        |-                  |
+
+*1: DRM-Free demo was EU PCSF00095 "ModNation Racers: Road Trip", just downloaded, not started.
 
 ## Credits for Ideas and Features
 * ONElua Team for [AccountManager][1]
