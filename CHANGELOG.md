@@ -1,13 +1,17 @@
 # Vita Account Manager - Changelog
 
+## v0.82
+* NEW: Create accounts folder on startup.
+* FIX: Sanitized some string usages.
+
 ## v0.81
-* Extracts IDPS and PSID of console.
+* NEW: Extracts IDPS and PSID of console.
 
 ## v0.80
-* First public release
-* Saves, restores and removes PSN/SEN account.
-* Deletes execution history files.
-* Can write-protect execution history files.
+* NEW: First public release
+* NEW: Saves, restores and removes PSN/SEN account.
+* NEW: Deletes execution history files.
+* NEW: Can write-protect execution history files.
 
 
 ## To do:
