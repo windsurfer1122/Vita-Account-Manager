@@ -36,7 +36,6 @@ void save_console_details(char *title)
 	int size_target_path;
 	char base_path[(MAX_PATH_LENGTH)+1];
 	char target_path[(MAX_PATH_LENGTH)+1];
-	char *value;
 	char idps[16];
 	struct SceKernelOpenPsId psid;
 
@@ -55,15 +54,7 @@ void save_console_details(char *title)
 	size_base_path = sceClibStrnlen(base_path, (MAX_PATH_LENGTH));
 	printf("Saving console details to %s...\e[0K\n", base_path);
 	// create target base path directories
-	value = base_path;
-	while ((value = strchr(value, '/')) != NULL) {
-		*value = '\0';
-		if (!check_folder_exists(base_path)) {
-			//printf("\e[2mCreating folder %s/...\e[22m\e[0K\n", base_path);
-			sceIoMkdir(base_path, 0006);
-		}
-		*value++ = '/';
-	};
+	create_path(base_path, 0, 0);
 	//
 	sceClibStrncpy(target_path, base_path, (MAX_PATH_LENGTH));
 	target_path[size_base_path] = '\0';

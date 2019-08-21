@@ -43,6 +43,7 @@ extern int button_cancel;
 int get_key();
 void draw_title_line(const char *menu_title);
 void draw_pixel_line(int *return_x, int *return_y);
+void create_path(char *check_path, int start_offset, int display);
 void wait_for_cancel_button(void);
 
 #endif  /* __MAIN_H__ */

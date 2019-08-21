@@ -152,6 +152,29 @@ void delete_app_save_data(void)
 	sceIoRemove("savedata0:/sce_sys/sealedkey");
 }
 
+void create_path(char *check_path, int start_offset, int display) {
+	char *value;
+
+	if (check_path == NULL) {
+		return;
+	}
+
+	// create path directories
+	value = &check_path[start_offset];
+	while ((value = strchr(value, '/')) != NULL) {
+		*value = '\0';
+		if (!check_folder_exists(check_path)) {
+			if (display) {
+				printf("\e[2mCreating folder %s/...\e[22m\e[0K\n", check_path);
+			}
+			sceIoMkdir(check_path, 0006);
+		}
+		*value++ = '/';
+	};
+
+	return;
+}
+
 void wait_for_cancel_button(void)
 {
 	bool menu_run;

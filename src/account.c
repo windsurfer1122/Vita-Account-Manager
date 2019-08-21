@@ -298,7 +298,6 @@ void set_file_data(struct File_Data *file_data, char *username)
 	int size_source_path;
 	char source_path[(MAX_PATH_LENGTH)+1];
 	char target_path[(MAX_PATH_LENGTH)+1];
-	char *value;
 
 	source_path[(MAX_PATH_LENGTH)] = '\0';
 	target_path[(MAX_PATH_LENGTH)] = '\0';
@@ -337,15 +336,7 @@ void set_file_data(struct File_Data *file_data, char *username)
 				printf("\e[1mMissing source %s...\e[22m\e[0K\n", source_path);
 			} else {
 				// create target path directories
-				value = target_path;
-				while ((value = strchr(value, '/')) != NULL) {
-					*value = '\0';
-					if (!check_folder_exists(target_path)) {
-						printf("\e[2mCreating folder %s/...\e[22m\e[0K\n", target_path);
-						sceIoMkdir(target_path, 0006);
-					}
-					*value++ = '/';
-				};
+				create_path(target_path, 0, 1);
 				// copy file
 				printf("\e[2mCopying %s...\e[22m\e[0K\n", source_path);
 				copy_file(source_path, target_path);
@@ -496,15 +487,7 @@ void save_account_details(struct Registry_Data *reg_data, struct File_Data *file
 	size_base_path = sceClibStrnlen(base_path, (MAX_PATH_LENGTH));
 	printf("Saving account details to %s...\e[0K\n", base_path);
 	// create target base path directories
-	value = base_path;
-	while ((value = strchr(value, '/')) != NULL) {
-		*value = '\0';
-		if (!check_folder_exists(base_path)) {
-			//printf("\e[2mCreating folder %s/...\e[22m\e[0K\n", base_path);
-			sceIoMkdir(base_path, 0006);
-		}
-		*value++ = '/';
-	};
+	create_path(base_path, 0, 0);
 	//
 	sceClibStrncpy(target_path, base_path, (MAX_PATH_LENGTH));
 
@@ -525,15 +508,7 @@ void save_account_details(struct Registry_Data *reg_data, struct File_Data *file
 		sceClibStrncat(target_path, reg_data->entries[i].key_save_path, (MAX_PATH_LENGTH));
 		sceClibStrncat(target_path, reg_data->entries[i].key_name, (MAX_PATH_LENGTH));
 		// create target path directories
-		value = &target_path[size_base_path];
-		while ((value = strchr(value, '/')) != NULL) {
-			*value = '\0';
-			if (!check_folder_exists(target_path)) {
-				//printf("\e[2mCreating folder %s/...\e[22m\e[0K\n", target_path);
-				sceIoMkdir(target_path, 0006);
-			}
-			*value++ = '/';
-		};
+		create_path(target_path, size_base_path, 0);
 
 		switch(reg_data->entries[i].key_type) {
 			case KEY_TYPE_INT:
@@ -577,15 +552,7 @@ void save_account_details(struct Registry_Data *reg_data, struct File_Data *file
 		sceClibStrncat(target_path, file_data->entries[i].file_save_path, (MAX_PATH_LENGTH));
 		sceClibStrncat(target_path, file_data->entries[i].file_name_path, (MAX_PATH_LENGTH));
 		// create target path directories
-		value = &target_path[size_base_path];
-		while ((value = strchr(value, '/')) != NULL) {
-			*value = '\0';
-			if (!check_folder_exists(target_path)) {
-				//printf("\e[2mCreating folder %s/...\e[22m\e[0K\n", target_path);
-				sceIoMkdir(target_path, 0006);
-			}
-			*value++ = '/';
-		};
+		create_path(target_path, size_base_path, 0);
 
 		// build source path
 		sceClibStrncpy(source_path, file_data->entries[i].file_path, (MAX_PATH_LENGTH));
@@ -1041,6 +1008,13 @@ idx_username].key_value));
 void main_account(void)
 {
 	int i;
+	char base_path[(MAX_PATH_LENGTH)+1];
+
+	// create accounts base path
+	base_path[(MAX_PATH_LENGTH)] = '\0';
+	sceClibStrncpy(base_path, app_base_path, (MAX_PATH_LENGTH));
+	sceClibStrncat(base_path, accounts_folder, (MAX_PATH_LENGTH));
+	create_path(base_path, 0, 0);
 
 	// determine special indexes of registry data
 	template_reg_user_data.idx_username = -1;
