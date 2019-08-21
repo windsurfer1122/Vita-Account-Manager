@@ -157,8 +157,10 @@ void get_initial_reg_data(struct Registry_Data *reg_data)
 	int i;
 	int key_id;
 	unsigned int user_number;
-	char string[(STRING_BUFFER_DEFAULT_SIZE)];
+	char string[(STRING_BUFFER_DEFAULT_SIZE)+1];
 	char *value;
+
+	string[(STRING_BUFFER_DEFAULT_SIZE)] = '\0';
 
 	// set/get initial registry user data
 	for (i = 0; i < reg_data->count; i++) {
@@ -273,8 +275,9 @@ void init_file_data(struct File_Data *file_data)
 void get_current_file_data(struct File_Data *file_data)
 {
 	int i;
-	char source_path[(MAX_PATH_LENGTH)];
+	char source_path[(MAX_PATH_LENGTH)+1];
 
+	source_path[(MAX_PATH_LENGTH)] = '\0';
 	for (i = 0; i < file_data->count; i++) {
 		if ((file_data->entries[i].file_path == NULL) || (file_data->entries[i].file_name_path == NULL)) {
 			file_data->entries[i].file_available = false;
@@ -293,9 +296,12 @@ void set_file_data(struct File_Data *file_data, char *username)
 {
 	int i;
 	int size_source_path;
-	char source_path[(MAX_PATH_LENGTH)];
-	char target_path[(MAX_PATH_LENGTH)];
+	char source_path[(MAX_PATH_LENGTH)+1];
+	char target_path[(MAX_PATH_LENGTH)+1];
 	char *value;
+
+	source_path[(MAX_PATH_LENGTH)] = '\0';
+	target_path[(MAX_PATH_LENGTH)] = '\0';
 
 	// build source base path
 	size_source_path = 0;
@@ -455,11 +461,13 @@ void save_account_details(struct Registry_Data *reg_data, struct File_Data *file
 	int size;
 	int size_base_path;
 	int size_target_path;
-	char base_path[(MAX_PATH_LENGTH)];
-	char target_path[(MAX_PATH_LENGTH)];
-	char source_path[(MAX_PATH_LENGTH)];
-	char string[(STRING_BUFFER_DEFAULT_SIZE)];
+	char base_path[(MAX_PATH_LENGTH)+1];
+	char target_path[(MAX_PATH_LENGTH)+1];
+	char source_path[(MAX_PATH_LENGTH)+1];
+	char string[(STRING_BUFFER_DEFAULT_SIZE)+1];
 	char *value;
+
+	string[(STRING_BUFFER_DEFAULT_SIZE)] = '\0';
 
 	// draw title line
 	draw_title_line(title);
@@ -475,6 +483,10 @@ void save_account_details(struct Registry_Data *reg_data, struct File_Data *file
 		sceKernelDelayThread(1500000);  // 1.5s
 		return;
 	}
+
+	base_path[(MAX_PATH_LENGTH)] = '\0';
+	target_path[(MAX_PATH_LENGTH)] = '\0';
+	source_path[(MAX_PATH_LENGTH)] = '\0';
 
 	// build target base path
 	sceClibStrncpy(base_path, app_base_path, (MAX_PATH_LENGTH));
@@ -597,11 +609,15 @@ void read_account_details(struct Registry_Data *reg_data, struct File_Data *file
 	int size;
 	int size_base_path;
 	int size_source_path;
-	char base_path[(MAX_PATH_LENGTH)];
-	char source_path[(MAX_PATH_LENGTH)];
-	char string[(STRING_BUFFER_DEFAULT_SIZE)];
+	char base_path[(MAX_PATH_LENGTH)+1];
+	char source_path[(MAX_PATH_LENGTH)+1];
+	char string[(STRING_BUFFER_DEFAULT_SIZE)+1];
 	char *value;
 	bool check;
+
+	base_path[(MAX_PATH_LENGTH)] = '\0';
+	source_path[(MAX_PATH_LENGTH)] = '\0';
+	string[(STRING_BUFFER_DEFAULT_SIZE)] = '\0';
 
 	// build source base path
 	sceClibStrncpy(base_path, app_base_path, (MAX_PATH_LENGTH));
@@ -724,7 +740,7 @@ bool switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_in
 	int button_pressed;
 	int i;
 	int size_base_path;
-	char base_path[(MAX_PATH_LENGTH)];
+	char base_path[(MAX_PATH_LENGTH)+1];
 	SceUID dfd;
 	SceIoDirent entry;
 	struct Dir_Entry *dirs;
@@ -737,6 +753,7 @@ bool switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_in
 	result = false;
 
 	// build source base path
+	base_path[(MAX_PATH_LENGTH)] = '\0';
 	sceClibStrncpy(base_path, app_base_path, (MAX_PATH_LENGTH));
 	sceClibStrncat(base_path, accounts_folder, (MAX_PATH_LENGTH));
 	size_base_path = sceClibStrnlen(base_path, (MAX_PATH_LENGTH));

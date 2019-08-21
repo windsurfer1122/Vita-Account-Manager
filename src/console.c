@@ -34,11 +34,14 @@ void save_console_details(char *title)
 {
 	int size_base_path;
 	int size_target_path;
-	char base_path[(MAX_PATH_LENGTH)];
-	char target_path[(MAX_PATH_LENGTH)];
+	char base_path[(MAX_PATH_LENGTH)+1];
+	char target_path[(MAX_PATH_LENGTH)+1];
 	char *value;
 	char idps[16];
 	struct SceKernelOpenPsId psid;
+
+	base_path[(MAX_PATH_LENGTH)] = '\0';
+	target_path[(MAX_PATH_LENGTH)] = '\0';
 
 	// draw title line
 	draw_title_line(title);

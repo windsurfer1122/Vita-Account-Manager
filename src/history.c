@@ -46,7 +46,9 @@ struct History_Data execution_history_data = {
 void get_current_execution_history_data(struct History_Data *hist_data)
 {
 	int i;
-	char source_path[(MAX_PATH_LENGTH)];
+	char source_path[(MAX_PATH_LENGTH)+1];
+
+	source_path[(MAX_PATH_LENGTH)] = '\0';
 
 	hist_data->count_protected = 0;
 	for (i = 0; i < hist_data->count; i++) {
@@ -109,7 +111,7 @@ void display_execution_history_details(struct History_Data *hist_data, char *tit
 void delete_execution_history(struct History_Data *hist_data, char *title)
 {
 	int i;
-	char target_path[(MAX_PATH_LENGTH)];
+	char target_path[(MAX_PATH_LENGTH)+1];
 
 	if (title != NULL) {
 		// draw title line
@@ -118,6 +120,8 @@ void delete_execution_history(struct History_Data *hist_data, char *title)
 		// draw pixel line
 		draw_pixel_line(NULL, NULL);
 	}
+
+	target_path[(MAX_PATH_LENGTH)] = '\0';
 
 	// execution history data
 	for (i = 0; i < hist_data->count; i++) {
@@ -149,13 +153,15 @@ void delete_execution_history(struct History_Data *hist_data, char *title)
 void protect_execution_history_files(struct History_Data *hist_data, char *title)
 {
 	int i;
-	char target_path[(MAX_PATH_LENGTH)];
+	char target_path[(MAX_PATH_LENGTH)+1];
 
 	// draw title line
 	draw_title_line(title);
 
 	// draw pixel line
 	draw_pixel_line(NULL, NULL);
+
+	target_path[(MAX_PATH_LENGTH)] = '\0';
 
 	// protect execution history files
 	for (i = 0; i < hist_data->count; i++) {
@@ -187,7 +193,9 @@ void protect_execution_history_files(struct History_Data *hist_data, char *title
 void unprotect_execution_history_files(struct History_Data *hist_data, char *title)
 {
 	int i;
-	char target_path[(MAX_PATH_LENGTH)];
+	char target_path[(MAX_PATH_LENGTH)+1];
+
+	target_path[(MAX_PATH_LENGTH)] = '\0';
 
 	// draw title line
 	draw_title_line(title);
