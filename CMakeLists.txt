@@ -27,7 +27,7 @@ set(VITA_APP_NAME "Vita Account Manager")
 # unique string of developer and Y = a unique number for this app
 set(VITA_TITLEID  "ACTM00003")
 # Optional version string to show in LiveArea's more info screen
-set(VITA_VERSION  "00.82")
+set(VITA_VERSION  "00.90")
 string(REGEX MATCH "[0]*([0-9]+\\..*)"
        VITA_VERSION_APP "${VITA_VERSION}")
 set(VITA_VERSION_APP "${CMAKE_MATCH_1}")
@@ -59,6 +59,7 @@ add_executable(${PROJECT_NAME}
   src/file.c
   src/history.c
   src/main.c
+  src/wlan.c
 )
 target_compile_definitions(${PROJECT_NAME}
   PUBLIC VITA_APP_NAME="${VITA_APP_NAME}"
