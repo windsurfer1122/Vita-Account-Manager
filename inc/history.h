@@ -20,13 +20,11 @@
 #ifndef __HISTORY_H__
 #define __HISTORY_H__
 
-#include <stdbool.h> // for bool
-
 struct History_Entry {
 	const char *const file_path;
 	const char *const file_name_path;
-	bool file_available;
-	bool file_protected;
+	int file_available;
+	int file_protected;
 };
 
 struct History_Data {

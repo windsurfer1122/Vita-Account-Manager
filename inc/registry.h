@@ -40,17 +40,20 @@ struct Registry_Entry {
 };
 
 struct Registry_Data {
-	int count;
-	size_t size;
+	int reg_count;
+	size_t reg_size;
 	int idx_username;
 	int idx_login_id;
 	int idx_ssid;
-	struct Registry_Entry *entries;
+	struct Registry_Entry *reg_entries;
 };
 
 #define REG_BUFFER_DEFAULT_SIZE 256
 
 const char *const file_ext_bin;
 const char *const file_ext_txt;
+
+
+void free_reg_data(struct Registry_Data *reg_data);
 
 #endif  /* __REGISTRY_H__ */

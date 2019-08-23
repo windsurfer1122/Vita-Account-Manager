@@ -22,6 +22,8 @@
 
 #include <debugScreen.h>  // for PsvDebugScreenFont
 
+#define STRING_BUFFER_DEFAULT_SIZE 1024
+
 #define max(a, b) \
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \

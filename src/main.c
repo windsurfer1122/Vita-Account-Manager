@@ -178,31 +178,31 @@ void create_path(char *check_path, int start_offset, int display) {
 
 void wait_for_cancel_button(void)
 {
-	bool menu_run;
+	int menu_run;
 	int button_pressed;
 
-	menu_run = true;
+	menu_run = 1;
 	do {
 		button_pressed = get_key();
 		if (button_pressed == button_cancel) {
-			menu_run = false;
+			menu_run = 0;
 		}
 	} while (menu_run);
 }
 
 int main(void)
 {
-	bool is_safe_mode;
-	bool menu_redraw;
-	bool menu_run;
+	int is_safe_mode;
+	int menu_redraw;
+	int menu_run;
 	int menu_items;
 	int menu_item;
-	bool no_user;
+	int no_user;
 	int x, y;
 	int button_pressed;
 	int i;
-	bool reboot;
-	//bool extra = false;
+	int reboot;
+	//int extra = 0;
 
 	struct Registry_Data initial_reg_user_data;
 	struct Registry_Data current_reg_user_data;
@@ -210,7 +210,7 @@ int main(void)
 	struct File_Data initial_file_user_data;
 	struct File_Data current_file_user_data;
 
-	reboot = false;
+	reboot = 0;
 
 	// initialize DebugScreen
 	psvDebugScreenInit();
@@ -237,9 +237,9 @@ int main(void)
 	determine_enter_cancel_button(&button_enter, &button_cancel);
 
 	// Check for homebrew safe mode (adapted from VitaShell)
-	is_safe_mode = false;
+	is_safe_mode = 0;
 	if (sceIoDevctl("ux0:", 0x3001, NULL, 0, NULL, 0) == 0x80010030) {
-		is_safe_mode = true;
+		is_safe_mode = 1;
 	}
 
 	// initialize account data variables and structures
@@ -248,25 +248,25 @@ int main(void)
 		main_wlan();
 
 		// initialize registry initial data
-		init_reg_data(&initial_reg_user_data);
-		get_initial_reg_data(&initial_reg_user_data);
+		init_account_reg_data(&initial_reg_user_data);
+		get_initial_account_reg_data(&initial_reg_user_data);
 
 		// initialize registry user data
-		init_reg_data(&current_reg_user_data);
+		init_account_reg_data(&current_reg_user_data);
 
 		// initialize file initial data
-		init_file_data(&initial_file_user_data);
+		init_account_file_data(&initial_file_user_data);
 
 		// initialize file user data
-		init_file_data(&current_file_user_data);
+		init_account_file_data(&current_file_user_data);
 	}
 
 	// run main menu
-	menu_redraw = true;
-	menu_run = true;
+	menu_redraw = 1;
+	menu_run = 1;
 	menu_items = 0;
 	menu_item = 0;
-	no_user = true;
+	no_user = 1;
 	do {
 		// redraw complete screen
 		if (menu_redraw) {
@@ -279,8 +279,8 @@ int main(void)
 			if (is_safe_mode) {
 				printf("\e[1mPlease enable unsafe homebrew in Henkaku settings.\e[22m\e[0K\n");
 			} else {
-				get_current_reg_data(&current_reg_user_data);
-				get_current_file_data(&current_file_user_data);
+				get_current_account_reg_data(&current_reg_user_data);
+				get_current_account_file_data(&current_file_user_data);
 				get_current_execution_history_data(&execution_history_data);
 
 				// draw current account data
@@ -323,7 +323,7 @@ int main(void)
 			}
 			printf("\e[0K\n");
 
-			menu_redraw = false;
+			menu_redraw = 0;
 		}
 
 		// draw menu marker
@@ -361,52 +361,52 @@ int main(void)
 			}
 		//} else if (button_pressed == button_cancel) {
 		//	extra = !extra;
-		//	menu_redraw = true;
+		//	menu_redraw = 1;
 		//}
 		} else if (button_pressed == button_enter) {
 			if (menu_item == menu_items) {  // last menu item is always exit
-				menu_run = false;
+				menu_run = 0;
 			} else if (menu_item == 0) {  // display account details
 				display_account_details_full(&current_reg_user_data, &current_file_user_data, "Current Account Details");
-				menu_redraw = true;
+				menu_redraw = 1;
 			} else if (menu_item == 1) {  // display initial account details
 				display_account_details_full(&initial_reg_user_data, &initial_file_user_data, "Initial Account Details");
-				menu_redraw = true;
+				menu_redraw = 1;
 			} else if (menu_item == 2) {  // save current account data
 				if (!no_user) {
 					save_account_details(&current_reg_user_data, &current_file_user_data, "Saving Current Account");
-					menu_redraw = true;
+					menu_redraw = 1;
 				}
 			} else if (menu_item == 3) {  // switch account
 				if (switch_account(&current_reg_user_data, &initial_reg_user_data, &initial_file_user_data, "Switch Account")) {
-					reboot = true;
+					reboot = 1;
 				}
-				menu_redraw = true;
+				menu_redraw = 1;
 			} else if(menu_item == 4) {  // remove current account
 				if (remove_account(&current_reg_user_data, &initial_reg_user_data, &initial_file_user_data, "Removing Current Account")) {
-					reboot = true;
+					reboot = 1;
 				}
-				menu_redraw = true;
+				menu_redraw = 1;
 			} else if (menu_item == 5) {  // display execution history details
 				display_execution_history_details(&execution_history_data, "Current Execution History");
-				menu_redraw = true;
+				menu_redraw = 1;
 			} else if (menu_item == 6) {  // delete execution history files
 				delete_execution_history(&execution_history_data, "Delete Execution History");
-				reboot = true;
-				menu_redraw = true;
+				reboot = 1;
+				menu_redraw = 1;
 			} else if (menu_item == 7) {  // write-protect execution history files
 				if (execution_history_data.count_protected < execution_history_data.count) {
 					protect_execution_history_files(&execution_history_data, "Protect Execution History");
-					menu_redraw = true;
+					menu_redraw = 1;
 				}
 			} else if (menu_item == 8) {  // unprotect execution history files
 				if (execution_history_data.count_protected > 0) {
 					unprotect_execution_history_files(&execution_history_data, "Unprotect Execution History");
-					menu_redraw = true;
+					menu_redraw = 1;
 				}
 			} else if (menu_item == 9) {  // save console details
 				save_console_details("Saving console details");
-				menu_redraw = true;
+				menu_redraw = 1;
 			}
 		}
 	} while (menu_run);

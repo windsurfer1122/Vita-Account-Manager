@@ -20,6 +20,13 @@
 #ifndef __WLAN_H__
 #define __WLAN_H__
 
+#include <registry.h>
+
+struct Wlan_Data {
+	int wlan_count;
+	struct Registry_Data *wlan_reg_data;
+};
+
 void main_wlan(void);
 
 #endif  /* __WLAN_H__ */

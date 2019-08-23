@@ -27,12 +27,12 @@
 #define printf psvDebugScreenPrintf
 
 struct History_Entry execution_history_entries[] = {
-	{ "ur0:ci/file/", "m.log", false, false, },
-	{ "ur0:user/00/shell/playlog/", "playlod.dat", false, false, },
-	{ "ur0:user/00/shell/playlog/", "playlog.dat", false, false, },
-	{ "ur0:user/00/shell/playlog/", "playlog.dat.tmp", false, false, },
-	{ "vd0:history/", "data.bak", false, false, },
-	{ "vd0:history/", "data.bin", false, false, },
+	{ "ur0:ci/file/", "m.log", 0, 0, },
+	{ "ur0:user/00/shell/playlog/", "playlod.dat", 0, 0, },
+	{ "ur0:user/00/shell/playlog/", "playlog.dat", 0, 0, },
+	{ "ur0:user/00/shell/playlog/", "playlog.dat.tmp", 0, 0, },
+	{ "vd0:history/", "data.bak", 0, 0, },
+	{ "vd0:history/", "data.bin", 0, 0, },
 };
 
 struct History_Data execution_history_data = {
@@ -51,8 +51,8 @@ void get_current_execution_history_data(struct History_Data *hist_data)
 
 	hist_data->count_protected = 0;
 	for (i = 0; i < hist_data->count; i++) {
-		hist_data->entries[i].file_available = false;
-		hist_data->entries[i].file_protected = false;
+		hist_data->entries[i].file_available = 0;
+		hist_data->entries[i].file_protected = 0;
 
 		if ((hist_data->entries[i].file_path == NULL) || (hist_data->entries[i].file_name_path == NULL)) {
 			continue;

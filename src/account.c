@@ -17,7 +17,7 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include <stdlib.h>  // for malloc()
+#include <stdlib.h>  // for malloc(), free()
 #include <vitasdk.h>
 
 #include <main.h>
@@ -36,8 +36,6 @@ struct Dir_Entry {
 
 const char *const accounts_folder = "accounts/";
 
-#define STRING_BUFFER_DEFAULT_SIZE 1024
-
 const char *const reg_config_np = "/CONFIG/NP";
 const char *const reg_config_system = "/CONFIG/SYSTEM";
 const char *const file_reg_config_np = "registry/CONFIG/NP/";
@@ -52,7 +50,7 @@ const int reg_id_dob = 274;
 const int reg_id_env = 260;
 
 // values from os0:kd/registry.db0 and https://github.com/devnoname120/RegistryEditorMOD/blob/master/regs.c
-struct Registry_Entry template_reg_user_entries[] = {
+struct Registry_Entry template_account_reg_entries[] = {
 	{ reg_id_username, reg_config_system, file_reg_config_system, NULL, "username", KEY_TYPE_STR, 17, NULL, },
 	{ reg_id_login_id, reg_config_np, file_reg_config_np, NULL, "login_id", KEY_TYPE_STR, 65, NULL, },
 	{ 257, reg_config_np, file_reg_config_np, NULL, "account_id", KEY_TYPE_BIN, 8, NULL, },
@@ -68,82 +66,65 @@ struct Registry_Entry template_reg_user_entries[] = {
 	{ 256, reg_config_np, file_reg_config_np, NULL, "enable_np", KEY_TYPE_INT, 4, NULL, },
 };
 
-struct Registry_Data template_reg_user_data = {
-	.count = sizeof(template_reg_user_entries) / sizeof(template_reg_user_entries[0]),
-	.size = sizeof(template_reg_user_entries),
-	.entries = template_reg_user_entries,
+struct Registry_Data template_account_reg_data = {
+	.reg_count = sizeof(template_account_reg_entries) / sizeof(template_account_reg_entries[0]),
+	.reg_size = sizeof(template_account_reg_entries),
+	.reg_entries = template_account_reg_entries,
 };
 
-struct File_Entry template_file_user_entries[] = {
-	{ "tm0:", "tm0/", "npdrm/act.dat", false, },
-	{ "tm0:", "tm0/", "psmdrm/act.dat", false, },
-	{ "ur0:user/00/np/", "ur0/np/", "myprofile.dat", false, },
-	{ "ur0:user/00/trophy/data/sce_trop/", NULL, "TRPUSER.DAT", false, },
-	{ "ur0:user/00/trophy/data/sce_trop/sce_pfs/", NULL, "files.db", false, },
-	{ "ux0:", NULL, "id.dat", false, },
-	{ "imc0:", NULL, "id.dat", false, },
-	{ "uma0:", NULL, "id.dat", false, },
+struct File_Entry template_account_file_entries[] = {
+	{ "tm0:", "tm0/", "npdrm/act.dat", 0, },
+	{ "tm0:", "tm0/", "psmdrm/act.dat", 0, },
+	{ "ur0:user/00/np/", "ur0/np/", "myprofile.dat", 0, },
+	{ "ur0:user/00/trophy/data/sce_trop/", NULL, "TRPUSER.DAT", 0, },
+	{ "ur0:user/00/trophy/data/sce_trop/sce_pfs/", NULL, "files.db", 0, },
+	{ "ux0:", NULL, "id.dat", 0, },
+	{ "imc0:", NULL, "id.dat", 0, },
+	{ "uma0:", NULL, "id.dat", 0, },
 };
 
-struct File_Data template_file_user_data = {
-	.count = sizeof(template_file_user_entries) / sizeof(template_file_user_entries[0]),
-	.size = sizeof(template_file_user_entries),
-	.entries = template_file_user_entries,
+struct File_Data template_account_file_data = {
+	.file_count = sizeof(template_account_file_entries) / sizeof(template_account_file_entries[0]),
+	.file_size = sizeof(template_account_file_entries),
+	.file_entries = template_account_file_entries,
 };
 
 
-void init_reg_data(struct Registry_Data *reg_data)
+void init_account_reg_data(struct Registry_Data *reg_data)
 {
 	int i;
 
 	// Copy user template to new reg entries array
-	reg_data->count = template_reg_user_data.count;
-	reg_data->size = template_reg_user_data.size;
-	reg_data->idx_username = template_reg_user_data.idx_username;
-	reg_data->idx_login_id = template_reg_user_data.idx_login_id;
-	reg_data->entries = (struct Registry_Entry *)malloc(template_reg_user_data.size);
-	sceClibMemcpy((void *)(reg_data->entries), (void *)(template_reg_user_data.entries), template_reg_user_data.size);
+	reg_data->reg_count = template_account_reg_data.reg_count;
+	reg_data->reg_size = template_account_reg_data.reg_size;
+	reg_data->idx_username = template_account_reg_data.idx_username;
+	reg_data->idx_login_id = template_account_reg_data.idx_login_id;
+	reg_data->reg_entries = (struct Registry_Entry *)malloc(template_account_reg_data.reg_size);
+	sceClibMemcpy((void *)(reg_data->reg_entries), (void *)(template_account_reg_data.reg_entries), template_account_reg_data.reg_size);
 
 	// Alloc memory for each key
-	for (i = 0; i < template_reg_user_data.count; i++) {
-		switch(reg_data->entries[i].key_type) {
+	for (i = 0; i < template_account_reg_data.reg_count; i++) {
+		switch(reg_data->reg_entries[i].key_type) {
 			case KEY_TYPE_INT:
-				if (reg_data->entries[i].key_size <= 0) {
-					reg_data->entries[i].key_size = sizeof(int);
+				if (reg_data->reg_entries[i].key_size <= 0) {
+					reg_data->reg_entries[i].key_size = sizeof(int);
 				}
 				break;
 			case KEY_TYPE_STR:
 			case KEY_TYPE_BIN:
-				if (reg_data->entries[i].key_size <= 0) {
-					reg_data->entries[i].key_size = (REG_BUFFER_DEFAULT_SIZE);
+				if (reg_data->reg_entries[i].key_size <= 0) {
+					reg_data->reg_entries[i].key_size = (REG_BUFFER_DEFAULT_SIZE);
 				}
 				break;
 		}
-		reg_data->entries[i].key_value = (void *)malloc(reg_data->entries[i].key_size);
-		sceClibMemset(reg_data->entries[i].key_value, 0x00, reg_data->entries[i].key_size);
+		reg_data->reg_entries[i].key_value = (void *)malloc(reg_data->reg_entries[i].key_size);
+		sceClibMemset(reg_data->reg_entries[i].key_value, 0x00, reg_data->reg_entries[i].key_size);
 	}
 
 	return;
 }
 
-void free_reg_data(struct Registry_Data *reg_data)
-{
-	int i;
-
-	// Free memory for each key
-	for (i = 0; i < reg_data->count; i++) {
-		if (reg_data->entries[i].key_value != NULL) {
-			free(reg_data->entries[i].key_value);
-		}
-	}
-
-	// Copy user template to new reg entries array
-	free(reg_data->entries);
-
-	return;
-}
-
-void get_initial_reg_data(struct Registry_Data *reg_data)
+void get_initial_account_reg_data(struct Registry_Data *reg_data)
 {
 	int i;
 	int key_id;
@@ -154,70 +135,70 @@ void get_initial_reg_data(struct Registry_Data *reg_data)
 	string[(STRING_BUFFER_DEFAULT_SIZE)] = '\0';
 
 	// set/get initial registry user data
-	for (i = 0; i < reg_data->count; i++) {
-		key_id = reg_data->entries[i].key_id;
+	for (i = 0; i < reg_data->reg_count; i++) {
+		key_id = reg_data->reg_entries[i].key_id;
 		if (key_id == reg_id_username) {  // create dummy user name
 			sceKernelGetRandomNumber((void *)(&user_number), sizeof(user_number));
 			user_number %= 998;
 			user_number++;
 			sceClibSnprintf(string, (STRING_BUFFER_DEFAULT_SIZE), "user%03i", user_number);
 			//
-			value = (char *)(reg_data->entries[i].key_value);
-			sceClibStrncpy(value, string, reg_data->entries[i].key_size);
-			value[reg_data->entries[i].key_size] = '\0';
+			value = (char *)(reg_data->reg_entries[i].key_value);
+			sceClibStrncpy(value, string, reg_data->reg_entries[i].key_size);
+			value[reg_data->reg_entries[i].key_size] = '\0';
 		} else if (key_id == reg_id_lang) {  // keep language
-			value = (char *)(reg_data->entries[i].key_value);
-			sceRegMgrGetKeyStr(reg_data->entries[i].key_path, reg_data->entries[i].key_name, value, reg_data->entries[i].key_size);
+			value = (char *)(reg_data->reg_entries[i].key_value);
+			sceRegMgrGetKeyStr(reg_data->reg_entries[i].key_path, reg_data->reg_entries[i].key_name, value, reg_data->reg_entries[i].key_size);
 			if (value[0] == '\0') {  // fallback dummy
-				sceClibStrncpy(value, "en", reg_data->entries[i].key_size);
+				sceClibStrncpy(value, "en", reg_data->reg_entries[i].key_size);
 			}
-			value[reg_data->entries[i].key_size] = '\0';
+			value[reg_data->reg_entries[i].key_size] = '\0';
 		} else if (key_id == reg_id_country) {  // keep country
-			value = (char *)(reg_data->entries[i].key_value);
-			sceRegMgrGetKeyStr(reg_data->entries[i].key_path, reg_data->entries[i].key_name, value, reg_data->entries[i].key_size);
+			value = (char *)(reg_data->reg_entries[i].key_value);
+			sceRegMgrGetKeyStr(reg_data->reg_entries[i].key_path, reg_data->reg_entries[i].key_name, value, reg_data->reg_entries[i].key_size);
 			if (value[0] == '\0') {  // fallback dummy
-				sceClibStrncpy(value, "gb", reg_data->entries[i].key_size);
+				sceClibStrncpy(value, "gb", reg_data->reg_entries[i].key_size);
 			}
-			value[reg_data->entries[i].key_size] = '\0';
+			value[reg_data->reg_entries[i].key_size] = '\0';
 		} else if (key_id == reg_id_yob) {  // dummy year
-			*((int *)(reg_data->entries[i].key_value)) = 2000;
+			*((int *)(reg_data->reg_entries[i].key_value)) = 2000;
 		} else if (key_id == reg_id_mob) {  // dummy month
-			*((int *)(reg_data->entries[i].key_value)) = 1;
+			*((int *)(reg_data->reg_entries[i].key_value)) = 1;
 		} else if (key_id == reg_id_dob) {  // dummy day
-			*((int *)(reg_data->entries[i].key_value)) = 1;
+			*((int *)(reg_data->reg_entries[i].key_value)) = 1;
 		} else if (key_id == reg_id_env) {  // keep environment
-			value = (char *)(reg_data->entries[i].key_value);
-			sceRegMgrGetKeyStr(reg_data->entries[i].key_path, reg_data->entries[i].key_name, value, reg_data->entries[i].key_size);
+			value = (char *)(reg_data->reg_entries[i].key_value);
+			sceRegMgrGetKeyStr(reg_data->reg_entries[i].key_path, reg_data->reg_entries[i].key_name, value, reg_data->reg_entries[i].key_size);
 			if (value[0] == '\0') {  // fallback dummy
-				sceClibStrncpy(value, "np", reg_data->entries[i].key_size);
+				sceClibStrncpy(value, "np", reg_data->reg_entries[i].key_size);
 			}
-			value[reg_data->entries[i].key_size] = '\0';
+			value[reg_data->reg_entries[i].key_size] = '\0';
 		}
 	}
 
 	return;
 }
 
-void get_current_reg_data(struct Registry_Data *reg_data)
+void get_current_account_reg_data(struct Registry_Data *reg_data)
 {
 	int i;
 
-	for (i = 0; i < reg_data->count; i++) {
-		if (reg_data->entries[i].key_value == NULL) {
+	for (i = 0; i < reg_data->reg_count; i++) {
+		if (reg_data->reg_entries[i].key_value == NULL) {
 			continue;
 		}
-		sceClibMemset(reg_data->entries[i].key_value, 0x00, reg_data->entries[i].key_size);
+		sceClibMemset(reg_data->reg_entries[i].key_value, 0x00, reg_data->reg_entries[i].key_size);
 
-		switch(reg_data->entries[i].key_type) {
+		switch(reg_data->reg_entries[i].key_type) {
 			case KEY_TYPE_INT:
-				sceRegMgrGetKeyInt(reg_data->entries[i].key_path, reg_data->entries[i].key_name, (int *)(reg_data->entries[i].key_value));
+				sceRegMgrGetKeyInt(reg_data->reg_entries[i].key_path, reg_data->reg_entries[i].key_name, (int *)(reg_data->reg_entries[i].key_value));
 				break;
 			case KEY_TYPE_STR:
-				sceRegMgrGetKeyStr(reg_data->entries[i].key_path, reg_data->entries[i].key_name, (char *)(reg_data->entries[i].key_value), reg_data->entries[i].key_size);
-				((char *)(reg_data->entries[i].key_value))[reg_data->entries[i].key_size] = '\0';
+				sceRegMgrGetKeyStr(reg_data->reg_entries[i].key_path, reg_data->reg_entries[i].key_name, (char *)(reg_data->reg_entries[i].key_value), reg_data->reg_entries[i].key_size);
+				((char *)(reg_data->reg_entries[i].key_value))[reg_data->reg_entries[i].key_size] = '\0';
 				break;
 			case KEY_TYPE_BIN:
-				sceRegMgrGetKeyBin(reg_data->entries[i].key_path, reg_data->entries[i].key_name, reg_data->entries[i].key_value, reg_data->entries[i].key_size);
+				sceRegMgrGetKeyBin(reg_data->reg_entries[i].key_path, reg_data->reg_entries[i].key_name, reg_data->reg_entries[i].key_value, reg_data->reg_entries[i].key_size);
 				break;
 		}
 	}
@@ -225,26 +206,26 @@ void get_current_reg_data(struct Registry_Data *reg_data)
 	return;
 }
 
-void set_reg_data(struct Registry_Data *reg_data)
+void set_account_reg_data(struct Registry_Data *reg_data)
 {
 	int i;
 
-	for (i = 0; i < reg_data->count; i++) {
-		if (reg_data->entries[i].key_value == NULL) {
+	for (i = 0; i < reg_data->reg_count; i++) {
+		if (reg_data->reg_entries[i].key_value == NULL) {
 			continue;
 		}
-		printf("\e[2mSetting registry %s...\e[22m\e[0K\n", reg_data->entries[i].key_name);
+		printf("\e[2mSetting registry %s...\e[22m\e[0K\n", reg_data->reg_entries[i].key_name);
 
-		switch(reg_data->entries[i].key_type) {
+		switch(reg_data->reg_entries[i].key_type) {
 			case KEY_TYPE_INT:
-				sceRegMgrSetKeyInt(reg_data->entries[i].key_path, reg_data->entries[i].key_name, *((int *)(reg_data->entries[i].key_value)));
+				sceRegMgrSetKeyInt(reg_data->reg_entries[i].key_path, reg_data->reg_entries[i].key_name, *((int *)(reg_data->reg_entries[i].key_value)));
 				break;
 			case KEY_TYPE_STR:
-				((char *)(reg_data->entries[i].key_value))[reg_data->entries[i].key_size] = '\0';
-				sceRegMgrSetKeyStr(reg_data->entries[i].key_path, reg_data->entries[i].key_name, (char *)(reg_data->entries[i].key_value), reg_data->entries[i].key_size);
+				((char *)(reg_data->reg_entries[i].key_value))[reg_data->reg_entries[i].key_size] = '\0';
+				sceRegMgrSetKeyStr(reg_data->reg_entries[i].key_path, reg_data->reg_entries[i].key_name, (char *)(reg_data->reg_entries[i].key_value), reg_data->reg_entries[i].key_size);
 				break;
 			case KEY_TYPE_BIN:
-				sceRegMgrSetKeyBin(reg_data->entries[i].key_path, reg_data->entries[i].key_name, reg_data->entries[i].key_value, reg_data->entries[i].key_size);
+				sceRegMgrSetKeyBin(reg_data->reg_entries[i].key_path, reg_data->reg_entries[i].key_name, reg_data->reg_entries[i].key_value, reg_data->reg_entries[i].key_size);
 				break;
 		}
 	}
@@ -252,38 +233,38 @@ void set_reg_data(struct Registry_Data *reg_data)
 	return;
 }
 
-void init_file_data(struct File_Data *file_data)
+void init_account_file_data(struct File_Data *file_data)
 {
 	// Copy user template to new file entries array
-	file_data->count = template_file_user_data.count;
-	file_data->size = template_file_user_data.size;
-	file_data->entries = (struct File_Entry *)malloc(template_file_user_data.size);
-	sceClibMemcpy((void *)(file_data->entries), (void *)(template_file_user_data.entries), template_file_user_data.size);
+	file_data->file_count = template_account_file_data.file_count;
+	file_data->file_size = template_account_file_data.file_size;
+	file_data->file_entries = (struct File_Entry *)malloc(template_account_file_data.file_size);
+	sceClibMemcpy((void *)(file_data->file_entries), (void *)(template_account_file_data.file_entries), template_account_file_data.file_size);
 
 	return;
 }
 
-void get_current_file_data(struct File_Data *file_data)
+void get_current_account_file_data(struct File_Data *file_data)
 {
 	int i;
 	char source_path[(MAX_PATH_LENGTH)+1];
 
 	source_path[(MAX_PATH_LENGTH)] = '\0';
-	for (i = 0; i < file_data->count; i++) {
-		if ((file_data->entries[i].file_path == NULL) || (file_data->entries[i].file_name_path == NULL)) {
-			file_data->entries[i].file_available = false;
+	for (i = 0; i < file_data->file_count; i++) {
+		if ((file_data->file_entries[i].file_path == NULL) || (file_data->file_entries[i].file_name_path == NULL)) {
+			file_data->file_entries[i].file_available = 0;
 			continue;
 		}
 
-		sceClibStrncpy(source_path, file_data->entries[i].file_path, (MAX_PATH_LENGTH));
-		sceClibStrncat(source_path, file_data->entries[i].file_name_path, (MAX_PATH_LENGTH));
-		file_data->entries[i].file_available = check_file_exists(source_path);
+		sceClibStrncpy(source_path, file_data->file_entries[i].file_path, (MAX_PATH_LENGTH));
+		sceClibStrncat(source_path, file_data->file_entries[i].file_name_path, (MAX_PATH_LENGTH));
+		file_data->file_entries[i].file_available = check_file_exists(source_path);
 	}
 
 	return;
 }
 
-void set_file_data(struct File_Data *file_data, char *username)
+void set_account_file_data(struct File_Data *file_data, char *username)
 {
 	int i;
 	int size_source_path;
@@ -303,20 +284,20 @@ void set_file_data(struct File_Data *file_data, char *username)
 		size_source_path = sceClibStrnlen(source_path, (MAX_PATH_LENGTH));
 	}
 
-	for (i = 0; i < file_data->count; i++) {
-		if ((file_data->entries[i].file_path == NULL) || (file_data->entries[i].file_name_path == NULL)) {
+	for (i = 0; i < file_data->file_count; i++) {
+		if ((file_data->file_entries[i].file_path == NULL) || (file_data->file_entries[i].file_name_path == NULL)) {
 			continue;
 		}
 
 		// build target path
-		sceClibStrncpy(target_path, file_data->entries[i].file_path, (MAX_PATH_LENGTH));
-		sceClibStrncat(target_path, file_data->entries[i].file_name_path, (MAX_PATH_LENGTH));
+		sceClibStrncpy(target_path, file_data->file_entries[i].file_path, (MAX_PATH_LENGTH));
+		sceClibStrncat(target_path, file_data->file_entries[i].file_name_path, (MAX_PATH_LENGTH));
 
-		if ((username != NULL) && (file_data->entries[i].file_available)) {
+		if ((username != NULL) && (file_data->file_entries[i].file_available)) {
 			// build source path
 			source_path[size_source_path] = '\0';
-			sceClibStrncat(source_path, file_data->entries[i].file_save_path, (MAX_PATH_LENGTH));
-			sceClibStrncat(source_path, file_data->entries[i].file_name_path, (MAX_PATH_LENGTH));
+			sceClibStrncat(source_path, file_data->file_entries[i].file_save_path, (MAX_PATH_LENGTH));
+			sceClibStrncat(source_path, file_data->file_entries[i].file_name_path, (MAX_PATH_LENGTH));
 			// always remove target
 			if (check_file_exists(target_path)) {
 				printf("\e[2mDeleting target %s...\e[22m\e[0K\n", target_path);
@@ -345,31 +326,31 @@ void set_file_data(struct File_Data *file_data, char *username)
 	return;
 }
 
-void display_account_details_short(struct Registry_Data *reg_data, bool *no_user)
+void display_account_details_short(struct Registry_Data *reg_data, int *no_user)
 {
 	int len;
 
 	if (no_user != NULL) {
-		*no_user = false;
+		*no_user = 0;
 	}
 	// username
 	printf("Current User Name: ");
-	if ((reg_data->idx_username >= 0) && (reg_data->entries[reg_data->idx_username].key_value != NULL) && ((len = sceClibStrnlen((char *)(reg_data->entries[reg_data->idx_username].key_value), reg_data->entries[reg_data->idx_username].key_size)) > 0)) {
-		printf("%s\e[0K\n", (char *)(reg_data->entries[reg_data->idx_username].key_value), len);
+	if ((reg_data->idx_username >= 0) && (reg_data->reg_entries[reg_data->idx_username].key_value != NULL) && ((len = sceClibStrnlen((char *)(reg_data->reg_entries[reg_data->idx_username].key_value), reg_data->reg_entries[reg_data->idx_username].key_size)) > 0)) {
+		printf("%s\e[0K\n", (char *)(reg_data->reg_entries[reg_data->idx_username].key_value), len);
 	} else {
 		printf("<None>\e[0K\n");
 		if (no_user != NULL) {
-			*no_user = true;
+			*no_user = 1;
 		}
 	}
 	// login id
 	printf("Current Login ID: ");
-	if ((reg_data->idx_login_id >= 0) && (reg_data->entries[reg_data->idx_login_id].key_value != NULL) && ((len = sceClibStrnlen((char *)(reg_data->entries[reg_data->idx_login_id].key_value), reg_data->entries[reg_data->idx_login_id].key_size)) > 0)) {
-		printf("%s\e[0K\n", (char *)(reg_data->entries[reg_data->idx_login_id].key_value), len);
+	if ((reg_data->idx_login_id >= 0) && (reg_data->reg_entries[reg_data->idx_login_id].key_value != NULL) && ((len = sceClibStrnlen((char *)(reg_data->reg_entries[reg_data->idx_login_id].key_value), reg_data->reg_entries[reg_data->idx_login_id].key_size)) > 0)) {
+		printf("%s\e[0K\n", (char *)(reg_data->reg_entries[reg_data->idx_login_id].key_value), len);
 	} else {
 		printf("<None>\e[0K\n");
 		if (no_user != NULL) {
-			*no_user = true;
+			*no_user = 1;
 		}
 	}
 
@@ -391,39 +372,39 @@ void display_account_details_full(struct Registry_Data *reg_data, struct File_Da
 
 	// registry data
 	printf("Registry Data:\e[0K\n");
-	for (i = 0; i < reg_data->count; i++) {
-		printf("\e[2m%s/\e[22m%s: ", reg_data->entries[i].key_path, reg_data->entries[i].key_name);
+	for (i = 0; i < reg_data->reg_count; i++) {
+		printf("\e[2m%s/\e[22m%s: ", reg_data->reg_entries[i].key_path, reg_data->reg_entries[i].key_name);
 
-		switch(reg_data->entries[i].key_type) {
+		switch(reg_data->reg_entries[i].key_type) {
 			case KEY_TYPE_INT:
-				printf("%i\e[0K\n", *((int *)(reg_data->entries[i].key_value)));
+				printf("%i\e[0K\n", *((int *)(reg_data->reg_entries[i].key_value)));
 				break;
 			case KEY_TYPE_STR:
-				if ((reg_data->entries[i].key_value != NULL) && ((len = sceClibStrnlen((char *)(reg_data->entries[i].key_value), reg_data->entries[i].key_size)) > 0)) {
-					printf("%s (%i)\e[0K\n", (char *)(reg_data->entries[i].key_value), len);
+				if ((reg_data->reg_entries[i].key_value != NULL) && ((len = sceClibStrnlen((char *)(reg_data->reg_entries[i].key_value), reg_data->reg_entries[i].key_size)) > 0)) {
+					printf("%s (%i)\e[0K\n", (char *)(reg_data->reg_entries[i].key_value), len);
 				} else {
 					printf("<None>\e[0K\n");
 				}
 				break;
 			case KEY_TYPE_BIN:
-				for (j = 0; j < reg_data->entries[i].key_size; j++) {
-					printf("%02x", ((unsigned char *)(reg_data->entries[i].key_value))[j]);
+				for (j = 0; j < reg_data->reg_entries[i].key_size; j++) {
+					printf("%02x", ((unsigned char *)(reg_data->reg_entries[i].key_value))[j]);
 				}
-				printf(" (%i)\e[0K\n", reg_data->entries[i].key_size);
+				printf(" (%i)\e[0K\n", reg_data->reg_entries[i].key_size);
 				break;
 		}
 	}
 
 	// file data
 	printf("File Data:\e[0K\n");
-	for (i = 0; i < file_data->count; i++) {
-		if ((file_data->entries[i].file_path == NULL) || (file_data->entries[i].file_name_path == NULL)) {
+	for (i = 0; i < file_data->file_count; i++) {
+		if ((file_data->file_entries[i].file_path == NULL) || (file_data->file_entries[i].file_name_path == NULL)) {
 			continue;
 		}
 
-		printf("\e[2m%s\e[22m%s: ", file_data->entries[i].file_path, file_data->entries[i].file_name_path);
+		printf("\e[2m%s\e[22m%s: ", file_data->file_entries[i].file_path, file_data->file_entries[i].file_name_path);
 
-		if (file_data->entries[i].file_available) {
+		if (file_data->file_entries[i].file_available) {
 			printf("available\e[0K\n");
 		} else {
 			printf("missing\e[0K\n");
@@ -458,8 +439,8 @@ void save_account_details(struct Registry_Data *reg_data, struct File_Data *file
 	draw_pixel_line(NULL, NULL);
 
 	// check username and login id
-	if ((reg_data->idx_username < 0) || (reg_data->entries[reg_data->idx_username].key_value == NULL) || (sceClibStrnlen((char *)(reg_data->entries[reg_data->idx_username].key_value), 1) == 0)  // check username
-	    || (reg_data->idx_login_id < 0) || (reg_data->entries[reg_data->idx_login_id].key_value == NULL) || (sceClibStrnlen((char *)(reg_data->entries[reg_data->idx_login_id].key_value), 1) == 0))  // check login id
+	if ((reg_data->idx_username < 0) || (reg_data->reg_entries[reg_data->idx_username].key_value == NULL) || (sceClibStrnlen((char *)(reg_data->reg_entries[reg_data->idx_username].key_value), 1) == 0)  // check username
+	    || (reg_data->idx_login_id < 0) || (reg_data->reg_entries[reg_data->idx_login_id].key_value == NULL) || (sceClibStrnlen((char *)(reg_data->reg_entries[reg_data->idx_login_id].key_value), 1) == 0))  // check login id
 	{
 		printf("\e[1mThere is no linked account.\e[22m\e[0K\n");
 		sceKernelDelayThread(1500000);  // 1.5s
@@ -473,7 +454,7 @@ void save_account_details(struct Registry_Data *reg_data, struct File_Data *file
 	// build target base path
 	sceClibStrncpy(base_path, app_base_path, (MAX_PATH_LENGTH));
 	sceClibStrncat(base_path, accounts_folder, (MAX_PATH_LENGTH));
-	sceClibStrncat(base_path, (char *)(reg_data->entries[reg_data->idx_username].key_value), (MAX_PATH_LENGTH));
+	sceClibStrncat(base_path, (char *)(reg_data->reg_entries[reg_data->idx_username].key_value), (MAX_PATH_LENGTH));
 	sceClibStrncat(base_path, slash_folder, (MAX_PATH_LENGTH));
 	size_base_path = sceClibStrnlen(base_path, (MAX_PATH_LENGTH));
 	printf("Saving account details to %s...\e[0K\n", base_path);
@@ -485,76 +466,76 @@ void save_account_details(struct Registry_Data *reg_data, struct File_Data *file
 	// save registry user data
 	target_path[size_base_path] = '\0';
 	size_target_path = size_base_path;
-	for (i = 0; i < reg_data->count; i++) {
-		if (reg_data->entries[i].key_id == reg_id_username) {  // do not save username, already stored in account folder name
+	for (i = 0; i < reg_data->reg_count; i++) {
+		if (reg_data->reg_entries[i].key_id == reg_id_username) {  // do not save username, already stored in account folder name
 			continue;
 		}
 
-		if ((reg_data->entries[i].key_save_path == NULL) || (reg_data->entries[i].key_name == NULL)) {
+		if ((reg_data->reg_entries[i].key_save_path == NULL) || (reg_data->reg_entries[i].key_name == NULL)) {
 			continue;
 		}
 
 		// build target path
 		target_path[size_target_path] = '\0';
-		sceClibStrncat(target_path, reg_data->entries[i].key_save_path, (MAX_PATH_LENGTH));
-		sceClibStrncat(target_path, reg_data->entries[i].key_name, (MAX_PATH_LENGTH));
+		sceClibStrncat(target_path, reg_data->reg_entries[i].key_save_path, (MAX_PATH_LENGTH));
+		sceClibStrncat(target_path, reg_data->reg_entries[i].key_name, (MAX_PATH_LENGTH));
 		// create target path directories
 		create_path(target_path, size_base_path, 0);
 
-		switch(reg_data->entries[i].key_type) {
+		switch(reg_data->reg_entries[i].key_type) {
 			case KEY_TYPE_INT:
 				sceClibStrncat(target_path, file_ext_txt, (MAX_PATH_LENGTH));
-				sceClibSnprintf(string, (STRING_BUFFER_DEFAULT_SIZE), "%i", *((int *)(reg_data->entries[i].key_value)));
+				sceClibSnprintf(string, (STRING_BUFFER_DEFAULT_SIZE), "%i", *((int *)(reg_data->reg_entries[i].key_value)));
 				value = string;
-				size = sceClibStrnlen(value, (reg_data->entries[i].key_size));
+				size = sceClibStrnlen(value, (reg_data->reg_entries[i].key_size));
 				break;
 			case KEY_TYPE_STR:
 				sceClibStrncat(target_path, file_ext_txt, (MAX_PATH_LENGTH));
-				value = (char *)(reg_data->entries[i].key_value);
-				size = sceClibStrnlen(value, (reg_data->entries[i].key_size));
+				value = (char *)(reg_data->reg_entries[i].key_value);
+				size = sceClibStrnlen(value, (reg_data->reg_entries[i].key_size));
 				break;
 			case KEY_TYPE_BIN:
 				sceClibStrncat(target_path, file_ext_bin, (MAX_PATH_LENGTH));
-				value = (char *)(reg_data->entries[i].key_value);
-				size = reg_data->entries[i].key_size;
+				value = (char *)(reg_data->reg_entries[i].key_value);
+				size = reg_data->reg_entries[i].key_size;
 				break;
 			default:  // unknown type
 				continue;  // skip entry
 		}
-		printf("\e[2mWriting %s...\e[22m\e[0K\n", reg_data->entries[i].key_name);
+		printf("\e[2mWriting %s...\e[22m\e[0K\n", reg_data->reg_entries[i].key_name);
 		write_file(target_path, (void *)value, size);
 	}
 
 	// save file user data
 	target_path[size_base_path] = '\0';
 	size_target_path = size_base_path;
-	for (i = 0; i < file_data->count; i++) {
-		if ((file_data->entries[i].file_save_path == NULL) || (file_data->entries[i].file_name_path == NULL) || (file_data->entries[i].file_path == NULL)) {
+	for (i = 0; i < file_data->file_count; i++) {
+		if ((file_data->file_entries[i].file_save_path == NULL) || (file_data->file_entries[i].file_name_path == NULL) || (file_data->file_entries[i].file_path == NULL)) {
 			continue;
 		}
 
-		if (!file_data->entries[i].file_available) {
-			printf("\e[2mSkip missing %s...\e[22m\e[0K\n", file_data->entries[i].file_name_path);
+		if (!file_data->file_entries[i].file_available) {
+			printf("\e[2mSkip missing %s...\e[22m\e[0K\n", file_data->file_entries[i].file_name_path);
 			continue;
 		}
 
 		// build target path
 		target_path[size_target_path] = '\0';
-		sceClibStrncat(target_path, file_data->entries[i].file_save_path, (MAX_PATH_LENGTH));
-		sceClibStrncat(target_path, file_data->entries[i].file_name_path, (MAX_PATH_LENGTH));
+		sceClibStrncat(target_path, file_data->file_entries[i].file_save_path, (MAX_PATH_LENGTH));
+		sceClibStrncat(target_path, file_data->file_entries[i].file_name_path, (MAX_PATH_LENGTH));
 		// create target path directories
 		create_path(target_path, size_base_path, 0);
 
 		// build source path
-		sceClibStrncpy(source_path, file_data->entries[i].file_path, (MAX_PATH_LENGTH));
-		sceClibStrncat(source_path, file_data->entries[i].file_name_path, (MAX_PATH_LENGTH));
+		sceClibStrncpy(source_path, file_data->file_entries[i].file_path, (MAX_PATH_LENGTH));
+		sceClibStrncat(source_path, file_data->file_entries[i].file_name_path, (MAX_PATH_LENGTH));
 
 		// copy file
-		printf("\e[2mCopying %s...\e[22m\e[0K\n", file_data->entries[i].file_name_path);
+		printf("\e[2mCopying %s...\e[22m\e[0K\n", file_data->file_entries[i].file_name_path);
 		copy_file(source_path, target_path);
 	}
 
-	printf("Account %s saved!\e[0K\n", (char *)(reg_data->entries[reg_data->idx_username].key_value));
+	printf("Account %s saved!\e[0K\n", (char *)(reg_data->reg_entries[reg_data->idx_username].key_value));
 
 	wait_for_cancel_button();
 
@@ -571,7 +552,7 @@ void read_account_details(struct Registry_Data *reg_data, struct File_Data *file
 	char source_path[(MAX_PATH_LENGTH)+1];
 	char string[(STRING_BUFFER_DEFAULT_SIZE)+1];
 	char *value;
-	bool check;
+	int check;
 
 	base_path[(MAX_PATH_LENGTH)] = '\0';
 	source_path[(MAX_PATH_LENGTH)] = '\0';
@@ -580,7 +561,7 @@ void read_account_details(struct Registry_Data *reg_data, struct File_Data *file
 	// build source base path
 	sceClibStrncpy(base_path, app_base_path, (MAX_PATH_LENGTH));
 	sceClibStrncat(base_path, accounts_folder, (MAX_PATH_LENGTH));
-	sceClibStrncat(base_path, (char *)(reg_data->entries[reg_data->idx_username].key_value), (MAX_PATH_LENGTH));
+	sceClibStrncat(base_path, (char *)(reg_data->reg_entries[reg_data->idx_username].key_value), (MAX_PATH_LENGTH));
 	sceClibStrncat(base_path, slash_folder, (MAX_PATH_LENGTH));
 	size_base_path = sceClibStrnlen(base_path, (MAX_PATH_LENGTH));
 	printf("Reading account details from %s...\e[0K\n", base_path);
@@ -590,19 +571,19 @@ void read_account_details(struct Registry_Data *reg_data, struct File_Data *file
 	// load registry user data
 	source_path[size_base_path] = '\0';
 	size_source_path = size_base_path;
-	for (i = 0; i < reg_data->count; i++) {
-		if (reg_data->entries[i].key_id == reg_id_username) {  // do not read username, already stored in reg data from account folder name
+	for (i = 0; i < reg_data->reg_count; i++) {
+		if (reg_data->reg_entries[i].key_id == reg_id_username) {  // do not read username, already stored in reg data from account folder name
 			continue;
 		}
 
-		check = false;
-		if ((reg_data->entries[i].key_save_path != NULL) && (reg_data->entries[i].key_name != NULL)) {
-			check = true;
+		check = 0;
+		if ((reg_data->reg_entries[i].key_save_path != NULL) && (reg_data->reg_entries[i].key_name != NULL)) {
+			check = 1;
 			// build source path
 			source_path[size_source_path] = '\0';
-			sceClibStrncat(source_path, reg_data->entries[i].key_save_path, (MAX_PATH_LENGTH));
-			sceClibStrncat(source_path, reg_data->entries[i].key_name, (MAX_PATH_LENGTH));
-			switch(reg_data->entries[i].key_type) {
+			sceClibStrncat(source_path, reg_data->reg_entries[i].key_save_path, (MAX_PATH_LENGTH));
+			sceClibStrncat(source_path, reg_data->reg_entries[i].key_name, (MAX_PATH_LENGTH));
+			switch(reg_data->reg_entries[i].key_type) {
 				case KEY_TYPE_INT:
 					sceClibStrncat(source_path, file_ext_txt, (MAX_PATH_LENGTH));
 					break;
@@ -621,20 +602,20 @@ void read_account_details(struct Registry_Data *reg_data, struct File_Data *file
 		// check and read source path
 		if ((!check) || (!check_file_exists(source_path))) {
 			if (!check) {
-				printf("\e[2mUse initial %s...\e[22m\e[0K\n", reg_data->entries[i].key_name);
+				printf("\e[2mUse initial %s...\e[22m\e[0K\n", reg_data->reg_entries[i].key_name);
 			} else {
 				printf("\e[2mUse initial for missing %s...\e[22m\e[0K\n", source_path);
 			}
-			switch(reg_data->entries[i].key_type) {
+			switch(reg_data->reg_entries[i].key_type) {
 				case KEY_TYPE_INT:
-					*((int *)(reg_data->entries[i].key_value)) = *((int *)(reg_init_data->entries[i].key_value));
+					*((int *)(reg_data->reg_entries[i].key_value)) = *((int *)(reg_init_data->reg_entries[i].key_value));
 					break;
 				case KEY_TYPE_STR:
-					sceClibStrncpy((char *)(reg_data->entries[i].key_value), (char *)(reg_init_data->entries[i].key_value), (reg_data->entries[i].key_size) - 1);
-					((char *)(reg_data->entries[i].key_value))[reg_data->entries[i].key_size] = '\0';
+					sceClibStrncpy((char *)(reg_data->reg_entries[i].key_value), (char *)(reg_init_data->reg_entries[i].key_value), (reg_data->reg_entries[i].key_size) - 1);
+					((char *)(reg_data->reg_entries[i].key_value))[reg_data->reg_entries[i].key_size] = '\0';
 					break;
 				case KEY_TYPE_BIN:
-					sceClibMemcpy(reg_data->entries[i].key_value, reg_init_data->entries[i].key_value, reg_data->entries[i].key_size);
+					sceClibMemcpy(reg_data->reg_entries[i].key_value, reg_init_data->reg_entries[i].key_value, reg_data->reg_entries[i].key_size);
 					break;
 				default:  // unknown type
 					// TODO: error message unknown type
@@ -643,21 +624,21 @@ void read_account_details(struct Registry_Data *reg_data, struct File_Data *file
 		} else {
 			size = allocate_read_file(source_path, ((void **)(&value)));
 			printf("\e[2mReading %s... (%i)\e[22m\e[0K\n", source_path, size);
-			switch(reg_data->entries[i].key_type) {
+			switch(reg_data->reg_entries[i].key_type) {
 				case KEY_TYPE_INT:
 					size = min(size, (STRING_BUFFER_DEFAULT_SIZE) - 1);
 					sceClibMemcpy((void *)string, (void *)value, size);
 					string[size] = '\0';
-					*((int *)(reg_data->entries[i].key_value)) = atoi(string);
+					*((int *)(reg_data->reg_entries[i].key_value)) = atoi(string);
 					break;
 				case KEY_TYPE_STR:
-					size = min(size, (reg_data->entries[i].key_size) - 1);
-					sceClibStrncpy((char *)(reg_data->entries[i].key_value), value, size);
-					((char *)(reg_data->entries[i].key_value))[size] = '\0';
+					size = min(size, (reg_data->reg_entries[i].key_size) - 1);
+					sceClibStrncpy((char *)(reg_data->reg_entries[i].key_value), value, size);
+					((char *)(reg_data->reg_entries[i].key_value))[size] = '\0';
 					break;
 				case KEY_TYPE_BIN:
-					size = min(size, reg_data->entries[i].key_size);
-					sceClibMemcpy(reg_data->entries[i].key_value, (void *)value, size);
+					size = min(size, reg_data->reg_entries[i].key_size);
+					sceClibMemcpy(reg_data->reg_entries[i].key_value, (void *)value, size);
 					break;
 				default:  // unknown type
 					// TODO: error message unknown type
@@ -670,26 +651,26 @@ void read_account_details(struct Registry_Data *reg_data, struct File_Data *file
 	// load file user data
 	source_path[size_base_path] = '\0';
 	size_source_path = size_base_path;
-	for (i = 0; i < file_data->count; i++) {
-		if ((file_data->entries[i].file_save_path == NULL) || (file_data->entries[i].file_path == NULL) || (file_data->entries[i].file_name_path == NULL)) {
-			file_data->entries[i].file_available = false;
+	for (i = 0; i < file_data->file_count; i++) {
+		if ((file_data->file_entries[i].file_save_path == NULL) || (file_data->file_entries[i].file_path == NULL) || (file_data->file_entries[i].file_name_path == NULL)) {
+			file_data->file_entries[i].file_available = 0;
 			continue;
 		}
 
 		// build source path
 		source_path[size_source_path] = '\0';
-		sceClibStrncat(source_path, file_data->entries[i].file_save_path, (MAX_PATH_LENGTH));
-		sceClibStrncat(source_path, file_data->entries[i].file_name_path, (MAX_PATH_LENGTH));
-		file_data->entries[i].file_available = check_file_exists(source_path);
+		sceClibStrncat(source_path, file_data->file_entries[i].file_save_path, (MAX_PATH_LENGTH));
+		sceClibStrncat(source_path, file_data->file_entries[i].file_name_path, (MAX_PATH_LENGTH));
+		file_data->file_entries[i].file_available = check_file_exists(source_path);
 	}
 }
 
-bool switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_init_data, struct File_Data *file_init_data, char *title)
+int switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_init_data, struct File_Data *file_init_data, char *title)
 {
-	bool result;
-	bool menu_redraw;
-	bool menu_redraw_screen;
-	bool menu_run;
+	int result;
+	int menu_redraw;
+	int menu_redraw_screen;
+	int menu_run;
 	int menu_items;
 	int menu_item;
 	int x, y;
@@ -708,7 +689,7 @@ bool switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_in
 	int size;
 	int count;
 
-	result = false;
+	result = 0;
 
 	// build source base path
 	base_path[(MAX_PATH_LENGTH)] = '\0';
@@ -753,9 +734,9 @@ bool switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_in
 	base_path[size_base_path - 1] = '/';
 
 	// run switch menu
-	menu_redraw_screen = true;
-	menu_redraw = true;
-	menu_run = true;
+	menu_redraw_screen = 1;
+	menu_redraw = 1;
+	menu_run = 1;
 	menu_items = 0;
 	menu_item = 0;
 	dir_count2 = 0;
@@ -791,8 +772,8 @@ bool switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_in
 
 			dirs_per_screen = ((SCREEN_HEIGHT) - y2 + 1) / psv_font_current->size_h;
 
-			menu_redraw = true;
-			menu_redraw_screen = false;
+			menu_redraw = 1;
+			menu_redraw_screen = 0;
 		}
 
 		// redraw account list
@@ -804,18 +785,18 @@ bool switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_in
 			menu_items = 0;
 			for (i = 0; (i < dirs_per_screen) && (count < dir_count); i++, count++) {
 				menu_items++;
-				size = (dirs[count].size > (reg_init_data->entries[reg_init_data->idx_username].key_size - 1));
+				size = (dirs[count].size > (reg_init_data->reg_entries[reg_init_data->idx_username].key_size - 1));
 				if (size) {
 					printf("\e[2m");
 				}
-				printf(" %.*s", reg_init_data->entries[reg_init_data->idx_username].key_size, dirs[count].name);
+				printf(" %.*s", reg_init_data->reg_entries[reg_init_data->idx_username].key_size, dirs[count].name);
 				if (size) {
 					printf("... (name too long)\e[22m");
 				}
 				printf("\e[0K\n");
 			}
 
-			menu_redraw = false;
+			menu_redraw = 0;
 		}
 
 		// draw menu marker
@@ -848,7 +829,7 @@ bool switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_in
 				if (dir_count2 >= dir_count) {
 					dir_count2 = dir_count - 1;
 				}
-				menu_redraw = true;
+				menu_redraw = 1;
 			}
 		} else if (button_pressed == SCE_CTRL_LTRIGGER) {
 			if (dir_count2 > 0) {
@@ -856,14 +837,14 @@ bool switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_in
 				if (dir_count2 < 0) {
 					dir_count2 = 0;
 				}
-				menu_redraw = true;
+				menu_redraw = 1;
 			}
 		} else if (button_pressed == button_enter) {
 			if (menu_item == 0) {  // cancel
-				menu_run = false;
+				menu_run = 0;
 			} else if (menu_item > 0) {  // switch account
 				i = dir_count2 + menu_item - 1;
-				size = (dirs[i].size > (reg_init_data->entries[reg_init_data->idx_username].key_size - 1));
+				size = (dirs[i].size > (reg_init_data->reg_entries[reg_init_data->idx_username].key_size - 1));
 				if (!size) {
 					struct Registry_Data reg_new_data;
 					struct File_Data file_new_data;
@@ -872,31 +853,31 @@ bool switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_in
 					psvDebugScreenSetCoordsXY(&x3, &y3);
 					printf("\e[0J");
 					// initialize data for user to be switched to
-					init_reg_data(&reg_new_data);
-					init_file_data(&file_new_data);
+					init_account_reg_data(&reg_new_data);
+					init_account_file_data(&file_new_data);
 					// copy username
-					sceClibStrncpy((char *)(reg_new_data.entries[reg_new_data.idx_username].key_value), dirs[i].name, (reg_new_data.entries[reg_new_data.idx_username].key_size - 1));
+					sceClibStrncpy((char *)(reg_new_data.reg_entries[reg_new_data.idx_username].key_value), dirs[i].name, (reg_new_data.reg_entries[reg_new_data.idx_username].key_size - 1));
 					// read user data
 					read_account_details(&reg_new_data, &file_new_data, reg_init_data, file_init_data);
 					// check for sufficient user data (login_id)
-					if ((reg_new_data.idx_login_id < 0) || (reg_new_data.entries[reg_new_data.idx_login_id].key_value == NULL) || (sceClibStrnlen((char *)(reg_new_data.entries[reg_new_data.idx_login_id].key_value), 1) == 0))  // check login id
+					if ((reg_new_data.idx_login_id < 0) || (reg_new_data.reg_entries[reg_new_data.idx_login_id].key_value == NULL) || (sceClibStrnlen((char *)(reg_new_data.reg_entries[reg_new_data.idx_login_id].key_value), 1) == 0))  // check login id
 					{
-						printf("\e[1mAccount %s data is insufficient (at least login id is needed).\e[22m\e[0K\n", (char *)(reg_new_data.entries[reg_new_data.idx_username].key_value));
+						printf("\e[1mAccount %s data is insufficient (at least login id is needed).\e[22m\e[0K\n", (char *)(reg_new_data.reg_entries[reg_new_data.idx_username].key_value));
 						wait_for_cancel_button();
-						menu_redraw = true;
-						menu_redraw_screen = true;
+						menu_redraw = 1;
+						menu_redraw_screen = 1;
 					} else {
 						// set registry user data
-						set_reg_data(&reg_new_data);
+						set_account_reg_data(&reg_new_data);
 						// copy/remove file user data
-						set_file_data(&file_new_data, reg_new_data.entries[reg_new_data.idx_username].key_value);
+						set_account_file_data(&file_new_data, reg_new_data.reg_entries[reg_new_data.idx_username].key_value);
 						// delete execution history data
 						delete_execution_history(&execution_history_data, NULL);
 						//
-						printf("Account %s restored!\e[0K\n", (char *)(reg_new_data.entries[reg_new_data.idx_username].key_value));
+						printf("Account %s restored!\e[0K\n", (char *)(reg_new_data.reg_entries[reg_new_data.idx_username].key_value));
 						wait_for_cancel_button();
-						menu_run = false;
-						result = true;
+						menu_run = 0;
+						result = 1;
 					}
 					free_reg_data(&reg_new_data);
 				}
@@ -913,17 +894,17 @@ bool switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_in
 	return result;
 }
 
-bool remove_account(struct Registry_Data *reg_data, struct Registry_Data *reg_init_data, struct File_Data *file_init_data, char *title)
+int remove_account(struct Registry_Data *reg_data, struct Registry_Data *reg_init_data, struct File_Data *file_init_data, char *title)
 {
-	bool result;
-	bool menu_run;
+	int result;
+	int menu_run;
 	int menu_items;
 	int menu_item;
 	int x, y;
 	int button_pressed;
 	int i;
 
-	result = false;
+	result = 0;
 
 	// draw title line
 	draw_title_line(title);
@@ -945,7 +926,7 @@ bool remove_account(struct Registry_Data *reg_data, struct Registry_Data *reg_in
 	// draw menu
 	psvDebugScreenGetCoordsXY(NULL, &y);
 	x = 0;
-	menu_run = true;
+	menu_run = 1;
 	menu_items = 0;
 	menu_item = 0;
 	printf(" Cancel.\e[0K\n"); menu_items++;
@@ -978,17 +959,17 @@ bool remove_account(struct Registry_Data *reg_data, struct Registry_Data *reg_in
 			menu_item--;
 		} else if (button_pressed == button_enter) {
 			if (menu_item == 0) {  // cancel
-				menu_run = false;
+				menu_run = 0;
 			} else if (menu_item == 1) {  // remove account
-				set_reg_data(reg_init_data);
-				set_file_data(file_init_data, NULL);
+				set_account_reg_data(reg_init_data);
+				set_account_file_data(file_init_data, NULL);
 				delete_execution_history(&execution_history_data, NULL);
 				//
-				printf("Account %s removed!\e[0K\n", (char *)(reg_data->entries[reg_data->
+				printf("Account %s removed!\e[0K\n", (char *)(reg_data->reg_entries[reg_data->
 idx_username].key_value));
 				wait_for_cancel_button();
-				menu_run = false;
-				result = true;
+				menu_run = 0;
+				result = 1;
 			}
 		}
 	} while (menu_run);
@@ -1008,20 +989,20 @@ void main_account(void)
 	create_path(base_path, 0, 0);
 
 	// determine special indexes of registry data
-	template_reg_user_data.idx_username = -1;
-	template_reg_user_data.idx_login_id = -1;
-	template_reg_user_data.idx_ssid = -1;
-	for (i = 0; i < template_reg_user_data.count; i++) {
+	template_account_reg_data.idx_username = -1;
+	template_account_reg_data.idx_login_id = -1;
+	template_account_reg_data.idx_ssid = -1;
+	for (i = 0; i < template_account_reg_data.reg_count; i++) {
 		// username
-		if ((template_reg_user_data.idx_username < 0) && (template_reg_user_data.entries[i].key_id == reg_id_username)) {
-			template_reg_user_data.idx_username = i;
+		if ((template_account_reg_data.idx_username < 0) && (template_account_reg_data.reg_entries[i].key_id == reg_id_username)) {
+			template_account_reg_data.idx_username = i;
 		}
 		// login id
-		if ((template_reg_user_data.idx_login_id < 0) && (template_reg_user_data.entries[i].key_id == reg_id_login_id)) {
-			template_reg_user_data.idx_login_id = i;
+		if ((template_account_reg_data.idx_login_id < 0) && (template_account_reg_data.reg_entries[i].key_id == reg_id_login_id)) {
+			template_account_reg_data.idx_login_id = i;
 		}
 		// all found?
-		if ((template_reg_user_data.idx_username >= 0) && (template_reg_user_data.idx_login_id >= 0)) {
+		if ((template_account_reg_data.idx_username >= 0) && (template_account_reg_data.idx_login_id >= 0)) {
 			break;
 		}
 	}

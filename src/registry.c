@@ -17,5 +17,27 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <stdlib.h>  // for malloc(), free()
+
+#include <registry.h>
+
 const char *const file_ext_bin = ".bin";
 const char *const file_ext_txt = ".txt";
+
+
+void free_reg_data(struct Registry_Data *reg_data)
+{
+	int i;
+
+	// free memory of each key value
+	for (i = 0; i < reg_data->reg_count; i++) {
+		if (reg_data->reg_entries[i].key_value != NULL) {
+			free(reg_data->reg_entries[i].key_value);
+		}
+	}
+
+	// free memory of reg_entries array
+	free(reg_data->reg_entries);
+
+	return;
+}

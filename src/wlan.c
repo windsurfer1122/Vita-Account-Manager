@@ -17,11 +17,13 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <stdlib.h>  // for malloc(), free()
 #include <vitasdk.h>
 
 #include <main.h>
 #include <file.h>
 #include <registry.h>
+#include <wlan.h>
 
 #include <debugScreen.h>
 #define printf psvDebugScreenPrintf
@@ -37,7 +39,7 @@ const char *const file_reg_config_net = "registry/CONFIG/NET/";
 const int reg_id_ssid = 217;
 
 // values from os0:kd/registry.db0 and https://github.com/devnoname120/RegistryEditorMOD/blob/master/regs.c
-struct Registry_Entry template_wlan_entries[] = {
+struct Registry_Entry template_wlan_reg_entries[] = {
 	{ reg_id_ssid, reg_config_net_nn, file_reg_config_net, reg_config_net_wifi, "ssid", KEY_TYPE_STR, 33, NULL, },
 	{ 219, reg_config_net_nn, file_reg_config_net, reg_config_net_wifi, "wep_key", KEY_TYPE_STR, 27, NULL, },
 	{ 218, reg_config_net_nn, file_reg_config_net, reg_config_net_wifi, "wifi_security", KEY_TYPE_INT, 4, NULL, },
@@ -65,28 +67,46 @@ struct Registry_Entry template_wlan_entries[] = {
 	{ 231, reg_config_net_nn, file_reg_config_net, reg_config_net_ip, "secondary_dns", KEY_TYPE_STR, 16, NULL, },
 };
 
-struct Registry_Data template_wlan_data = {
-	.count = sizeof(template_wlan_entries) / sizeof(template_wlan_entries[0]),
-	.size = sizeof(template_wlan_entries),
-	.entries = template_wlan_entries,
+struct Registry_Data template_wlan_reg_data = {
+	.reg_count = sizeof(template_wlan_reg_entries) / sizeof(template_wlan_reg_entries[0]),
+	.reg_size = sizeof(template_wlan_reg_entries),
+	.reg_entries = template_wlan_reg_entries,
 };
 
+
+void free_wlan_data(struct Wlan_Data *wlan_data)
+{
+	int i;
+	struct Registry_Data *reg_data;
+
+	// free memory of each reg data entry
+	for (i = 0; i < wlan_data->wlan_count; i++) {
+		reg_data = &(wlan_data->wlan_reg_data[i]);
+		free_reg_data(reg_data);
+		free(reg_data);
+	}
+
+	// free memory of reg data array
+	free(wlan_data->wlan_reg_data);
+
+	return;
+}
 
 void main_wlan(void)
 {
 	int i;
 
 	// determine special indexes of registry data
-	template_wlan_data.idx_username = -1;
-	template_wlan_data.idx_login_id = -1;
-	template_wlan_data.idx_ssid = -1;
-	for (i = 0; i < template_wlan_data.count; i++) {
+	template_wlan_reg_data.idx_username = -1;
+	template_wlan_reg_data.idx_login_id = -1;
+	template_wlan_reg_data.idx_ssid = -1;
+	for (i = 0; i < template_wlan_reg_data.reg_count; i++) {
 		// ssid
-		if ((template_wlan_data.idx_ssid < 0) && (template_wlan_data.entries[i].key_id == reg_id_ssid)) {
-			template_wlan_data.idx_ssid = i;
+		if ((template_wlan_reg_data.idx_ssid < 0) && (template_wlan_reg_data.reg_entries[i].key_id == reg_id_ssid)) {
+			template_wlan_reg_data.idx_ssid = i;
 		}
 		// all found?
-		if (template_wlan_data.idx_ssid >= 0) {
+		if (template_wlan_reg_data.idx_ssid >= 0) {
 			break;
 		}
 	}

@@ -20,34 +20,33 @@
 #ifndef __ACCOUNT_H__
 #define __ACCOUNT_H__
 
-#include <stdbool.h> // for bool
 #include <registry.h> // for Registry_Data
 
 struct File_Entry {
 	const char *const file_path;
 	const char *const file_save_path;
 	const char *const file_name_path;
-	bool file_available;
+	int file_available;
 };
 
 struct File_Data {
-	int count;
-	size_t size;
-	struct File_Entry *entries;
+	int file_count;
+	size_t file_size;
+	struct File_Entry *file_entries;
 };
 
-void init_reg_data(struct Registry_Data *reg_data);
-void get_initial_reg_data(struct Registry_Data *reg_data);
-void get_current_reg_data(struct Registry_Data *reg_data);
+void init_account_reg_data(struct Registry_Data *reg_data);
+void get_initial_account_reg_data(struct Registry_Data *reg_data);
+void get_current_account_reg_data(struct Registry_Data *reg_data);
 
-void init_file_data(struct File_Data *file_data);
-void get_current_file_data(struct File_Data *file_data);
+void init_account_file_data(struct File_Data *file_data);
+void get_current_account_file_data(struct File_Data *file_data);
 
-void display_account_details_short(struct Registry_Data *reg_data, bool *no_user);
+void display_account_details_short(struct Registry_Data *reg_data, int *no_user);
 void display_account_details_full(struct Registry_Data *reg_data, struct File_Data *file_data, char *title);
 void save_account_details(struct Registry_Data *reg_data, struct File_Data *file_data, char *title);
-bool switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_init_data, struct File_Data *file_init_data, char *title);
-bool remove_account(struct Registry_Data *reg_data, struct Registry_Data *reg_init_data, struct File_Data *file_init_data, char *title);
+int switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_init_data, struct File_Data *file_init_data, char *title);
+int remove_account(struct Registry_Data *reg_data, struct Registry_Data *reg_init_data, struct File_Data *file_init_data, char *title);
 
 void main_account(void);
 
