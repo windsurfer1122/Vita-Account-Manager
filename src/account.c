@@ -70,6 +70,9 @@ struct Registry_Data template_account_reg_data = {
 	.reg_count = sizeof(template_account_reg_entries) / sizeof(template_account_reg_entries[0]),
 	.reg_size = sizeof(template_account_reg_entries),
 	.reg_entries = template_account_reg_entries,
+	.idx_username = -1,
+	.idx_login_id = -1,
+	.idx_ssid = -1,
 };
 
 struct File_Entry template_account_file_entries[] = {
@@ -94,16 +97,13 @@ void init_account_reg_data(struct Registry_Data *reg_data)
 {
 	int i;
 
-	// Copy user template to new reg entries array
-	reg_data->reg_count = template_account_reg_data.reg_count;
-	reg_data->reg_size = template_account_reg_data.reg_size;
-	reg_data->idx_username = template_account_reg_data.idx_username;
-	reg_data->idx_login_id = template_account_reg_data.idx_login_id;
+	// copy account template to reg data plus new reg entries array
+	sceClibMemcpy((void *)(reg_data), (void *)(&template_account_reg_data), sizeof(template_account_reg_data));
 	reg_data->reg_entries = (struct Registry_Entry *)malloc(template_account_reg_data.reg_size);
 	sceClibMemcpy((void *)(reg_data->reg_entries), (void *)(template_account_reg_data.reg_entries), template_account_reg_data.reg_size);
 
-	// Alloc memory for each key
-	for (i = 0; i < template_account_reg_data.reg_count; i++) {
+	// alloc memory for each key
+	for (i = 0; i < reg_data->reg_count; i++) {
 		switch(reg_data->reg_entries[i].key_type) {
 			case KEY_TYPE_INT:
 				if (reg_data->reg_entries[i].key_size <= 0) {
@@ -134,7 +134,7 @@ void get_initial_account_reg_data(struct Registry_Data *reg_data)
 
 	string[(STRING_BUFFER_DEFAULT_SIZE)] = '\0';
 
-	// set/get initial registry user data
+	// set/get initial account registry data
 	for (i = 0; i < reg_data->reg_count; i++) {
 		key_id = reg_data->reg_entries[i].key_id;
 		if (key_id == reg_id_username) {  // create dummy user name
@@ -235,9 +235,8 @@ void set_account_reg_data(struct Registry_Data *reg_data)
 
 void init_account_file_data(struct File_Data *file_data)
 {
-	// Copy user template to new file entries array
-	file_data->file_count = template_account_file_data.file_count;
-	file_data->file_size = template_account_file_data.file_size;
+	// copy account template to new file entries array
+	sceClibMemcpy((void *)(file_data), (void *)(&template_account_file_data), sizeof(template_account_file_data));
 	file_data->file_entries = (struct File_Entry *)malloc(template_account_file_data.file_size);
 	sceClibMemcpy((void *)(file_data->file_entries), (void *)(template_account_file_data.file_entries), template_account_file_data.file_size);
 
@@ -463,7 +462,7 @@ void save_account_details(struct Registry_Data *reg_data, struct File_Data *file
 	//
 	sceClibStrncpy(target_path, base_path, (MAX_PATH_LENGTH));
 
-	// save registry user data
+	// save account registry data
 	target_path[size_base_path] = '\0';
 	size_target_path = size_base_path;
 	for (i = 0; i < reg_data->reg_count; i++) {
@@ -506,7 +505,7 @@ void save_account_details(struct Registry_Data *reg_data, struct File_Data *file
 		write_file(target_path, (void *)value, size);
 	}
 
-	// save file user data
+	// save account file data
 	target_path[size_base_path] = '\0';
 	size_target_path = size_base_path;
 	for (i = 0; i < file_data->file_count; i++) {
@@ -568,7 +567,7 @@ void read_account_details(struct Registry_Data *reg_data, struct File_Data *file
 	//
 	sceClibStrncpy(source_path, base_path, (MAX_PATH_LENGTH));
 
-	// load registry user data
+	// load account registry data
 	source_path[size_base_path] = '\0';
 	size_source_path = size_base_path;
 	for (i = 0; i < reg_data->reg_count; i++) {
@@ -648,7 +647,7 @@ void read_account_details(struct Registry_Data *reg_data, struct File_Data *file
 		}
 	}
 
-	// load file user data
+	// load account file data
 	source_path[size_base_path] = '\0';
 	size_source_path = size_base_path;
 	for (i = 0; i < file_data->file_count; i++) {
@@ -685,7 +684,7 @@ int switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_ini
 	struct Dir_Entry *dirs;
 	int dir_count;
 	int dir_count2;
-	int dirs_per_screen;
+	int entries_per_screen;
 	int size;
 	int count;
 
@@ -770,7 +769,7 @@ int switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_ini
 			psvDebugScreenGetCoordsXY(NULL, &y2);  // start of account list
 			x2 = 0;
 
-			dirs_per_screen = ((SCREEN_HEIGHT) - y2 + 1) / psv_font_current->size_h;
+			entries_per_screen = ((SCREEN_HEIGHT) - y2 + 1) / psv_font_current->size_h;
 
 			menu_redraw = 1;
 			menu_redraw_screen = 0;
@@ -783,7 +782,7 @@ int switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_ini
 
 			count = dir_count2;
 			menu_items = 0;
-			for (i = 0; (i < dirs_per_screen) && (count < dir_count); i++, count++) {
+			for (i = 0; (i < entries_per_screen) && (count < dir_count); i++, count++) {
 				menu_items++;
 				size = (dirs[count].size > (reg_init_data->reg_entries[reg_init_data->idx_username].key_size - 1));
 				if (size) {
@@ -825,7 +824,7 @@ int switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_ini
 			menu_item--;
 		} else if (button_pressed == SCE_CTRL_RTRIGGER) {
 			if (count < dir_count) {
-				dir_count2 += dirs_per_screen;
+				dir_count2 += entries_per_screen;
 				if (dir_count2 >= dir_count) {
 					dir_count2 = dir_count - 1;
 				}
@@ -833,7 +832,7 @@ int switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_ini
 			}
 		} else if (button_pressed == SCE_CTRL_LTRIGGER) {
 			if (dir_count2 > 0) {
-				dir_count2 -= dirs_per_screen;
+				dir_count2 -= entries_per_screen;
 				if (dir_count2 < 0) {
 					dir_count2 = 0;
 				}
@@ -852,14 +851,14 @@ int switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_ini
 					// clear data part of screen
 					psvDebugScreenSetCoordsXY(&x3, &y3);
 					printf("\e[0J");
-					// initialize data for user to be switched to
+					// initialize data for account to be switched to
 					init_account_reg_data(&reg_new_data);
 					init_account_file_data(&file_new_data);
 					// copy username
 					sceClibStrncpy((char *)(reg_new_data.reg_entries[reg_new_data.idx_username].key_value), dirs[i].name, (reg_new_data.reg_entries[reg_new_data.idx_username].key_size - 1));
-					// read user data
+					// read account data
 					read_account_details(&reg_new_data, &file_new_data, reg_init_data, file_init_data);
-					// check for sufficient user data (login_id)
+					// check for sufficient account data (login_id)
 					if ((reg_new_data.idx_login_id < 0) || (reg_new_data.reg_entries[reg_new_data.idx_login_id].key_value == NULL) || (sceClibStrnlen((char *)(reg_new_data.reg_entries[reg_new_data.idx_login_id].key_value), 1) == 0))  // check login id
 					{
 						printf("\e[1mAccount %s data is insufficient (at least login id is needed).\e[22m\e[0K\n", (char *)(reg_new_data.reg_entries[reg_new_data.idx_username].key_value));
@@ -867,9 +866,9 @@ int switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_ini
 						menu_redraw = 1;
 						menu_redraw_screen = 1;
 					} else {
-						// set registry user data
+						// set account registry  data
 						set_account_reg_data(&reg_new_data);
-						// copy/remove file user data
+						// copy/remove account file data
 						set_account_file_data(&file_new_data, reg_new_data.reg_entries[reg_new_data.idx_username].key_value);
 						// delete execution history data
 						delete_execution_history(&execution_history_data, NULL);
@@ -965,8 +964,7 @@ int remove_account(struct Registry_Data *reg_data, struct Registry_Data *reg_ini
 				set_account_file_data(file_init_data, NULL);
 				delete_execution_history(&execution_history_data, NULL);
 				//
-				printf("Account %s removed!\e[0K\n", (char *)(reg_data->reg_entries[reg_data->
-idx_username].key_value));
+				printf("Account %s removed!\e[0K\n", (char *)(reg_data->reg_entries[reg_data->idx_username].key_value));
 				wait_for_cancel_button();
 				menu_run = 0;
 				result = 1;
@@ -989,9 +987,6 @@ void main_account(void)
 	create_path(base_path, 0, 0);
 
 	// determine special indexes of registry data
-	template_account_reg_data.idx_username = -1;
-	template_account_reg_data.idx_login_id = -1;
-	template_account_reg_data.idx_ssid = -1;
 	for (i = 0; i < template_account_reg_data.reg_count; i++) {
 		// username
 		if ((template_account_reg_data.idx_username < 0) && (template_account_reg_data.reg_entries[i].key_id == reg_id_username)) {

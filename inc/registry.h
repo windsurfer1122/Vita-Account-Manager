@@ -20,7 +20,7 @@
 #ifndef __REGISTRY_H__
 #define __REGISTRY_H__
 
-#include <vitasdk.h>
+#include <vitasdk.h>  // for size_t
 
 enum {
 	KEY_TYPE_INT=0,
@@ -42,10 +42,10 @@ struct Registry_Entry {
 struct Registry_Data {
 	int reg_count;
 	size_t reg_size;
+	struct Registry_Entry *reg_entries;
 	int idx_username;
 	int idx_login_id;
 	int idx_ssid;
-	struct Registry_Entry *reg_entries;
 };
 
 #define REG_BUFFER_DEFAULT_SIZE 256

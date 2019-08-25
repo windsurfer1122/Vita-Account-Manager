@@ -22,11 +22,16 @@
 
 #include <registry.h>
 
+#define MAX_WLAN 30
+
 struct Wlan_Data {
-	int wlan_count;
-	struct Registry_Data *wlan_reg_data;
+	int wlan_found;
+	struct Registry_Data *wlan_reg_data[(MAX_WLAN)];
 };
 
+void init_wlan_data(struct Wlan_Data *wlan_data);
+void get_current_wlan_data(struct Wlan_Data *wlan_data);
+void save_wlan_details(struct Wlan_Data *wlan_data, char *title);
 void main_wlan(void);
 
 #endif  /* __WLAN_H__ */

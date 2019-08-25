@@ -29,6 +29,10 @@ void free_reg_data(struct Registry_Data *reg_data)
 {
 	int i;
 
+	if (reg_data == NULL) {
+		return;
+	}
+
 	// free memory of each key value
 	for (i = 0; i < reg_data->reg_count; i++) {
 		if (reg_data->reg_entries[i].key_value != NULL) {
@@ -38,6 +42,8 @@ void free_reg_data(struct Registry_Data *reg_data)
 
 	// free memory of reg_entries array
 	free(reg_data->reg_entries);
+	reg_data->reg_entries = NULL;
+	reg_data->reg_count = 0;
 
 	return;
 }
