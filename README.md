@@ -2,6 +2,7 @@
 Switch between multiple PSN/SEN accounts on a PS Vita or PS TV.
 Handle execution history.
 Dump console IDs.
+Save and restore WLAN settings.
 
 ## Features
 * Save the current account for later restore.
@@ -16,6 +17,7 @@ Dump console IDs.
 * Write-protect execution history files by replacing files with not overwritable directories.
   A reboot is still needed to clear execution history in memory.
 * Save the IDPS and PSID of the console.
+* Save WLAN settings and restore them.
 * Uses an extandable coding framework for easy enhancements and/or extensions. Go fork and send [pull requests][11] and/or patches.
 
 ## Details
@@ -60,6 +62,35 @@ Dump console IDs.
   * Data is stored at `ux0:data/ACTM00003/console/`.
     * `idps.bin` - IDPS of console
     * `psid.bin` - PSID of console
+* WLAN data.
+  * Data is stored at `ux0:data/ACTM00003/wlans/<ssid>/`.
+  * Saved registry entries.
+    * Stored under `registry/` with their full entry path, but excluding the NET count (01-30 decimal).
+    * `/CONFIG/NET/WIFI/ssid`
+    * `/CONFIG/NET/WIFI/wep_key`
+    * `/CONFIG/NET/WIFI/wifi_security`
+    * `/CONFIG/NET/WIFI/wpa_key`
+    * `/CONFIG/NET/APP/http_proxy_flag`
+    * `/CONFIG/NET/APP/http_proxy_port`
+    * `/CONFIG/NET/APP/http_proxy_server`
+    * `/CONFIG/NET/COMMON/conf_flag`
+    * `/CONFIG/NET/COMMON/conf_name`
+    * `/CONFIG/NET/COMMON/conf_serial_no`
+    * `/CONFIG/NET/COMMON/conf_type`
+    * `/CONFIG/NET/COMMON/device`
+    * `/CONFIG/NET/COMMON/enable_auto_connect`
+    * `/CONFIG/NET/COMMON/ether_mode`
+    * `/CONFIG/NET/COMMON/mtu`
+    * `/CONFIG/NET/IP/auth_key`
+    * `/CONFIG/NET/IP/auth_name`
+    * `/CONFIG/NET/IP/default_route`
+    * `/CONFIG/NET/IP/dhcp_hostname`
+    * `/CONFIG/NET/IP/dns_flag`
+    * `/CONFIG/NET/IP/ip_address`
+    * `/CONFIG/NET/IP/ip_config`
+    * `/CONFIG/NET/IP/netmask`
+    * `/CONFIG/NET/IP/primary_dns`
+    * `/CONFIG/NET/IP/secondary_dns`
 
 ## Converting Backups of Other Account Managers
 * AccountManager by ONElua Team ([link][1])
