@@ -66,7 +66,7 @@ Save and restore WLAN settings.
   * Data is stored at `ux0:data/ACTM00003/wlans/<ssid>/`.
   * Saved registry entries.
     * Stored under `registry/` with their full entry path, but excluding the NET count (01-30 decimal).
-    * `/CONFIG/NET/WIFI/ssid`
+    * `/CONFIG/NET/WIFI/ssid` - WLAN SSID, used as folder name to store data
     * `/CONFIG/NET/WIFI/wep_key`
     * `/CONFIG/NET/WIFI/wifi_security`
     * `/CONFIG/NET/WIFI/wpa_key`
