@@ -32,6 +32,7 @@ struct Wlan_Data {
 void init_wlan_data(struct Wlan_Data *wlan_data);
 void get_current_wlan_data(struct Wlan_Data *wlan_data);
 void save_wlan_details(struct Wlan_Data *wlan_data, char *title);
+void load_wlan_details(struct Wlan_Data *wlan_data, char *title);
 void main_wlan(void);
 
 #endif  /* __WLAN_H__ */

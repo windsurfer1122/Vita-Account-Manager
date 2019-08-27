@@ -22,7 +22,7 @@
 
 #include <file.h>
 
-int allocate_read_file(const char *file, void **buffer) {
+int allocate_read_file(const char *file, void **buffer_ptr) {
   SceUID fd = sceIoOpen(file, SCE_O_RDONLY, 0);
   if (fd < 0)
     return fd;
@@ -30,13 +30,13 @@ int allocate_read_file(const char *file, void **buffer) {
   int size = sceIoLseek32(fd, 0, SCE_SEEK_END);
   sceIoLseek32(fd, 0, SCE_SEEK_SET);
 
-  *buffer = malloc(size);
-  if (!*buffer) {
+  *buffer_ptr = malloc(size);
+  if (!*buffer_ptr) {
     sceIoClose(fd);
     return -1;
   }
 
-  int read = sceIoRead(fd, *buffer, size);
+  int read = sceIoRead(fd, *buffer_ptr, size);
   sceIoClose(fd);
 
   return read;

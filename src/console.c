@@ -19,8 +19,9 @@
 
 #include <vitasdk.h>
 
-#include <main.h>
+#include <dir.h>
 #include <file.h>
+#include <main.h>
 
 #include <debugScreen.h>
 #define printf psvDebugScreenPrintf

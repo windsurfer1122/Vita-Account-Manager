@@ -55,6 +55,7 @@ link_directories(
 add_executable(${PROJECT_NAME}
   src/account.c
   src/console.c
+  src/dir.c
   src/debugScreen.c
   src/file.c
   src/history.c

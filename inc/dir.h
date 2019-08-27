@@ -17,21 +17,18 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef __MAIN_H__
-#define __MAIN_H__
+#ifndef __DIR_H__
+#define __DIR_H__
 
-#include <debugScreen.h>  // for PsvDebugScreenFont
+struct Dir_Entry {
+	size_t size;
+	char *name;
+};
 
-extern const char *const app_base_path;
+extern const char *const slash_folder;
 
-extern PsvDebugScreenFont *psv_font_current;
+void create_path(char *check_path, int start_offset, int display);
+int get_subdirs(const char *const base_path, struct Dir_Entry **dirs_ptr);
+void free_subdirs(struct Dir_Entry *dirs, int dir_count);
 
-extern int button_enter;
-extern int button_cancel;
-
-int get_key();
-void draw_title_line(const char *menu_title);
-void draw_pixel_line(int *return_x, int *return_y);
-void wait_for_cancel_button(void);
-
-#endif  /* __MAIN_H__ */
+#endif  /* __DIR_H__ */

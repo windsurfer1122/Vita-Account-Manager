@@ -22,7 +22,7 @@
 #define MAX_PATH_LENGTH 1024
 #define TRANSFER_SIZE (128 * 1024)
 
-int allocate_read_file(const char *file, void **buffer);
+int allocate_read_file(const char *file, void **buffer_ptr);
 int read_file(const char *file, void *buf, int size);
 int write_file(const char *file, const void *buf, int size);
 int get_file_size(const char *file);

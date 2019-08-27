@@ -30,7 +30,6 @@
 #define printf psvDebugScreenPrintf
 
 const char *const app_base_path = "ux0:data/" VITA_TITLEID "/";
-const char *const slash_folder = "/";
 
 // DebugScreen Font Handling
 PsvDebugScreenFont *psv_font_default_1x;
@@ -153,29 +152,6 @@ void delete_app_save_data(void)
 	sceIoRemove("savedata0:/sce_sys/sealedkey");
 }
 
-void create_path(char *check_path, int start_offset, int display) {
-	char *value;
-
-	if (check_path == NULL) {
-		return;
-	}
-
-	// create path directories
-	value = &check_path[start_offset];
-	while ((value = strchr(value, '/')) != NULL) {
-		*value = '\0';
-		if (!check_folder_exists(check_path)) {
-			if (display) {
-				printf("\e[2mCreating folder %s/...\e[22m\e[0K\n", check_path);
-			}
-			sceIoMkdir(check_path, 0006);
-		}
-		*value++ = '/';
-	};
-
-	return;
-}
-
 void wait_for_cancel_button(void)
 {
 	int menu_run;
@@ -204,8 +180,8 @@ int main(void)
 	int reboot;
 	//int extra = 0;
 
-	struct Registry_Data initial_account_reg_data;
-	struct Registry_Data current_account_reg_data;
+	struct Registry_Data *initial_account_reg_data;
+	struct Registry_Data *current_account_reg_data;
 	struct File_Data initial_account_file_data;
 	struct File_Data current_account_file_data;
 	struct Wlan_Data current_wlan_data;
@@ -248,10 +224,12 @@ int main(void)
 		main_wlan();
 
 		// initialize initial account registry data
+		initial_account_reg_data = NULL;
 		init_account_reg_data(&initial_account_reg_data);
-		get_initial_account_reg_data(&initial_account_reg_data);
+		get_initial_account_reg_data(initial_account_reg_data);
 
 		// initialize current account registry data
+		current_account_reg_data = NULL;
 		init_account_reg_data(&current_account_reg_data);
 
 		// initialize initial account file data
@@ -282,13 +260,13 @@ int main(void)
 			if (is_safe_mode) {
 				printf("\e[1mPlease enable unsafe homebrew in Henkaku settings.\e[22m\e[0K\n");
 			} else {
-				get_current_account_reg_data(&current_account_reg_data);
+				get_current_account_reg_data(current_account_reg_data);
 				get_current_account_file_data(&current_account_file_data);
 				get_current_execution_history_data(&execution_history_data);
 				get_current_wlan_data(&current_wlan_data);
 
 				// draw current account data
-				display_account_details_short(&current_account_reg_data, &no_user);
+				display_account_details_short(current_account_reg_data, &no_user);
 
 				// draw pixel line
 				draw_pixel_line(NULL, NULL);
@@ -321,6 +299,7 @@ int main(void)
 				if (current_wlan_data.wlan_found <= 0) { printf("\e[2m"); }
 				printf(" Save WLAN details.\e[0K\n"); menu_items++;
 				if (current_wlan_data.wlan_found <= 0) { printf("\e[22m"); }
+				printf(" Load WLAN details.\e[0K\n"); menu_items++;
 			}
 			// last menu item is always exit
 			if (reboot) {
@@ -374,23 +353,23 @@ int main(void)
 			if (menu_item == menu_items) {  // last menu item is always exit
 				menu_run = 0;
 			} else if (menu_item == 0) {  // display account details
-				display_account_details_full(&current_account_reg_data, &current_account_file_data, "Current Account Details");
+				display_account_details_full(current_account_reg_data, &current_account_file_data, "Current Account Details");
 				menu_redraw = 1;
 			} else if (menu_item == 1) {  // display initial account details
-				display_account_details_full(&initial_account_reg_data, &initial_account_file_data, "Initial Account Details");
+				display_account_details_full(initial_account_reg_data, &initial_account_file_data, "Initial Account Details");
 				menu_redraw = 1;
 			} else if (menu_item == 2) {  // save current account data
 				if (!no_user) {
-					save_account_details(&current_account_reg_data, &current_account_file_data, "Saving Current Account");
+					save_account_details(current_account_reg_data, &current_account_file_data, "Saving Current Account");
 					menu_redraw = 1;
 				}
 			} else if (menu_item == 3) {  // switch account
-				if (switch_account(&current_account_reg_data, &initial_account_reg_data, &initial_account_file_data, "Switch Account")) {
+				if (switch_account(current_account_reg_data, initial_account_reg_data, &initial_account_file_data, "Switch Account")) {
 					reboot = 1;
 				}
 				menu_redraw = 1;
 			} else if(menu_item == 4) {  // remove current account
-				if (remove_account(&current_account_reg_data, &initial_account_reg_data, &initial_account_file_data, "Removing Current Account")) {
+				if (remove_account(current_account_reg_data, initial_account_reg_data, &initial_account_file_data, "Removing Current Account")) {
 					reboot = 1;
 				}
 				menu_redraw = 1;
@@ -414,11 +393,15 @@ int main(void)
 			} else if (menu_item == 9) {  // save console details
 				save_console_details("Saving console details");
 				menu_redraw = 1;
-			} else if (menu_item == 10) {  // save WLAN details
+			} else if (menu_item == 10) {  // save wlan details
 				get_current_wlan_data(&current_wlan_data);
 				if (current_wlan_data.wlan_found > 0) {
 					save_wlan_details(&current_wlan_data, "Saving WLAN details");
 				}
+				menu_redraw = 1;
+			} else if (menu_item == 11) {  // load wlan details
+				get_current_wlan_data(&current_wlan_data);
+				load_wlan_details(&current_wlan_data, "Loading WLAN details");
 				menu_redraw = 1;
 			}
 		}

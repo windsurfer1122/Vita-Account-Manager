@@ -17,21 +17,19 @@
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef __MAIN_H__
-#define __MAIN_H__
+#ifndef __COMMON_H__
+#define __COMMON_H__
 
-#include <debugScreen.h>  // for PsvDebugScreenFont
+#define STRING_BUFFER_DEFAULT_SIZE 1024
 
-extern const char *const app_base_path;
+#define max(a, b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
 
-extern PsvDebugScreenFont *psv_font_current;
+#define min(a, b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a < _b ? _a : _b; })
 
-extern int button_enter;
-extern int button_cancel;
-
-int get_key();
-void draw_title_line(const char *menu_title);
-void draw_pixel_line(int *return_x, int *return_y);
-void wait_for_cancel_button(void);
-
-#endif  /* __MAIN_H__ */
+#endif  /* __COMMON_H__ */

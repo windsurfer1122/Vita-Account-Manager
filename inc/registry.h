@@ -50,10 +50,9 @@ struct Registry_Data {
 
 #define REG_BUFFER_DEFAULT_SIZE 256
 
-const char *const file_ext_bin;
-const char *const file_ext_txt;
-
-
+void init_reg_data(struct Registry_Data **reg_data_ptr, const struct Registry_Data *const template_reg_data);
 void free_reg_data(struct Registry_Data *reg_data);
+void save_reg_data(const char *const base_path, const struct Registry_Data *const reg_data, const int skip_reg_id);
+void load_reg_data(const char *const base_path, struct Registry_Data *reg_data, const struct Registry_Data *const reg_init_data, const int skip_reg_id);
 
 #endif  /* __REGISTRY_H__ */

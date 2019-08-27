@@ -35,7 +35,7 @@ struct File_Data {
 	struct File_Entry *file_entries;
 };
 
-void init_account_reg_data(struct Registry_Data *reg_data);
+void init_account_reg_data(struct Registry_Data **reg_data_ptr);
 void get_initial_account_reg_data(struct Registry_Data *reg_data);
 void get_current_account_reg_data(struct Registry_Data *reg_data);
 
