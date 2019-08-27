@@ -179,33 +179,6 @@ void get_current_account_reg_data(struct Registry_Data *reg_data)
 	return;
 }
 
-void set_account_reg_data(struct Registry_Data *reg_data)
-{
-	int i;
-
-	for (i = 0; i < reg_data->reg_count; i++) {
-		if (reg_data->reg_entries[i].key_value == NULL) {
-			continue;
-		}
-		printf("\e[2mSetting registry %s...\e[22m\e[0K\n", reg_data->reg_entries[i].key_name);
-
-		switch(reg_data->reg_entries[i].key_type) {
-			case KEY_TYPE_INT:
-				sceRegMgrSetKeyInt(reg_data->reg_entries[i].key_path, reg_data->reg_entries[i].key_name, *((int *)(reg_data->reg_entries[i].key_value)));
-				break;
-			case KEY_TYPE_STR:
-				((char *)(reg_data->reg_entries[i].key_value))[reg_data->reg_entries[i].key_size] = '\0';
-				sceRegMgrSetKeyStr(reg_data->reg_entries[i].key_path, reg_data->reg_entries[i].key_name, (char *)(reg_data->reg_entries[i].key_value), reg_data->reg_entries[i].key_size);
-				break;
-			case KEY_TYPE_BIN:
-				sceRegMgrSetKeyBin(reg_data->reg_entries[i].key_path, reg_data->reg_entries[i].key_name, reg_data->reg_entries[i].key_value, reg_data->reg_entries[i].key_size);
-				break;
-		}
-	}
-
-	return;
-}
-
 void init_account_file_data(struct File_Data *file_data)
 {
 	// copy account template to new file entries array
@@ -674,7 +647,7 @@ int switch_account(struct Registry_Data *reg_data, struct Registry_Data *reg_ini
 						menu_redraw = 1;
 					} else {
 						// set account registry data
-						set_account_reg_data(reg_new_data);
+						set_reg_data(reg_new_data, -1);
 						// copy/remove account file data
 						set_account_file_data(&file_new_data, reg_new_data->reg_entries[reg_new_data->idx_username].key_value);
 						// delete execution history data
@@ -772,7 +745,7 @@ int remove_account(struct Registry_Data *reg_data, struct Registry_Data *reg_ini
 				psvDebugScreenSetCoordsXY(&x3, &y3);
 				printf("\e[0J");
 				// set initial account data
-				set_account_reg_data(reg_init_data);
+				set_reg_data(reg_init_data, -1);
 				set_account_file_data(file_init_data, NULL);
 				// delete execution history data
 				delete_execution_history(&execution_history_data, NULL);

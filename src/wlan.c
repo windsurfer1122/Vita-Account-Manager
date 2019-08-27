@@ -561,7 +561,7 @@ void load_wlan_details(struct Wlan_Data *wlan_data, char *title)
 							continue;
 						}
 
-						if (sceClibStrcmp(dirs[count].name, (char *)(reg_data->reg_entries[reg_data->idx_ssid].key_value)) == 0) {
+						if (sceClibStrcmp(dirs[i].name, (char *)(reg_data->reg_entries[reg_data->idx_ssid].key_value)) == 0) {
 							update_slot = j;
 							break;
 						}
@@ -580,6 +580,8 @@ void load_wlan_details(struct Wlan_Data *wlan_data, char *title)
 					sceClibStrncpy((char *)(reg_new_data->reg_entries[reg_new_data->idx_ssid].key_value), dirs[i].name, (reg_new_data->reg_entries[reg_new_data->idx_ssid].key_size - 1));
 					// read wlan data
 					read_wlan_details(reg_new_data, initial_wlan_reg_data);
+					// set wlan registry data
+					set_reg_data(reg_new_data, update_slot+1);
 					//
 					printf("WLAN %s restored!\e[0K\n", (char *)(reg_new_data->reg_entries[reg_new_data->idx_ssid].key_value));
 					free_reg_data(reg_new_data);

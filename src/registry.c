@@ -177,6 +177,49 @@ void save_reg_data(const char *const base_path, const struct Registry_Data *cons
 	}
 }
 
+void set_reg_data(struct Registry_Data *reg_data, int slot)
+{
+	int i;
+	char reg_path[(STRING_BUFFER_DEFAULT_SIZE)+1];
+	int size;
+
+	reg_path[(STRING_BUFFER_DEFAULT_SIZE)] = '\0';
+
+	for (i = 0; i < reg_data->reg_count; i++) {
+		if (reg_data->reg_entries[i].key_value == NULL) {
+			continue;
+		}
+
+		// build registry path
+		sceClibSnprintf(reg_path, (STRING_BUFFER_DEFAULT_SIZE), reg_data->reg_entries[i].key_path, slot);
+		size = sceClibStrnlen(reg_path, (STRING_BUFFER_DEFAULT_SIZE));
+		sceClibStrncat(reg_path, slash_folder, (STRING_BUFFER_DEFAULT_SIZE));
+		if (reg_data->reg_entries[i].key_path_extension != NULL) {
+			sceClibStrncat(reg_path, reg_data->reg_entries[i].key_path_extension, (STRING_BUFFER_DEFAULT_SIZE));
+			size = sceClibStrnlen(reg_path, (STRING_BUFFER_DEFAULT_SIZE));
+			sceClibStrncat(reg_path, slash_folder, (STRING_BUFFER_DEFAULT_SIZE));
+		}
+		sceClibStrncat(reg_path, reg_data->reg_entries[i].key_name, (MAX_PATH_LENGTH));
+		printf("\e[2mSetting registry %s...\e[22m\e[0K\n", reg_path);
+		reg_path[size] = '\0';
+
+		switch(reg_data->reg_entries[i].key_type) {
+			case KEY_TYPE_INT:
+				sceRegMgrSetKeyInt(reg_path, reg_data->reg_entries[i].key_name, *((int *)(reg_data->reg_entries[i].key_value)));
+				break;
+			case KEY_TYPE_STR:
+				((char *)(reg_data->reg_entries[i].key_value))[reg_data->reg_entries[i].key_size] = '\0';
+				sceRegMgrSetKeyStr(reg_path, reg_data->reg_entries[i].key_name, (char *)(reg_data->reg_entries[i].key_value), reg_data->reg_entries[i].key_size);
+				break;
+			case KEY_TYPE_BIN:
+				sceRegMgrSetKeyBin(reg_path, reg_data->reg_entries[i].key_name, reg_data->reg_entries[i].key_value, reg_data->reg_entries[i].key_size);
+				break;
+		}
+	}
+
+	return;
+}
+
 void load_reg_data(const char *const base_path, struct Registry_Data *reg_data, const struct Registry_Data *const reg_init_data, const int skip_reg_id)
 {
 	int size_base_path;
