@@ -74,7 +74,7 @@ Save and restore WLAN settings.
     * `/CONFIG/NET/APP/http_proxy_port`
     * `/CONFIG/NET/APP/http_proxy_server`
     * `/CONFIG/NET/COMMON/conf_flag`
-    * `/CONFIG/NET/COMMON/conf_name`
+    * `/CONFIG/NET/COMMON/conf_name` - same as WLAN SSID
     * `/CONFIG/NET/COMMON/conf_serial_no`
     * `/CONFIG/NET/COMMON/conf_type`
     * `/CONFIG/NET/COMMON/device`

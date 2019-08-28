@@ -46,14 +46,15 @@ struct Registry_Data {
 	int idx_username;
 	int idx_login_id;
 	int idx_ssid;
+	int idx_conf_name;
 };
 
 #define REG_BUFFER_DEFAULT_SIZE 256
 
 void init_reg_data(struct Registry_Data **reg_data_ptr, const struct Registry_Data *const template_reg_data);
 void free_reg_data(struct Registry_Data *reg_data);
-void save_reg_data(const char *const base_path, const struct Registry_Data *const reg_data, const int skip_reg_id);
+void save_reg_data(const char *const base_path, const struct Registry_Data *const reg_data);
 void set_reg_data(struct Registry_Data *reg_data, int slot);
-void load_reg_data(const char *const base_path, struct Registry_Data *reg_data, const struct Registry_Data *const reg_init_data, const int skip_reg_id);
+void load_reg_data(const char *const base_path, struct Registry_Data *reg_data, const struct Registry_Data *const reg_init_data, const int skip_reg_id_1, const int skip_reg_id_2);
 
 #endif  /* __REGISTRY_H__ */

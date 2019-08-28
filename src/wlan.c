@@ -39,12 +39,13 @@ const char *const reg_config_net_ip = "IP";
 const char *const reg_config_net_wifi = "WIFI";
 const char *const file_reg_config_net = "registry/CONFIG/NET/";
 const int reg_id_ssid = 217;
+const int reg_id_conf_name = 210;
 const int reg_id_http_proxy_port = 235;
 const int reg_id_enable_auto_connect = 212;
 
 // values from os0:kd/registry.db0 and https://github.com/devnoname120/RegistryEditorMOD/blob/master/regs.c
 struct Registry_Entry template_wlan_reg_entries[] = {
-	{ reg_id_ssid, reg_config_net_nn, file_reg_config_net, reg_config_net_wifi, "ssid", KEY_TYPE_STR, 33, NULL, },
+	{ reg_id_ssid, reg_config_net_nn, NULL, reg_config_net_wifi, "ssid", KEY_TYPE_STR, 33, NULL, },
 	{ 219, reg_config_net_nn, file_reg_config_net, reg_config_net_wifi, "wep_key", KEY_TYPE_STR, 27, NULL, },
 	{ 218, reg_config_net_nn, file_reg_config_net, reg_config_net_wifi, "wifi_security", KEY_TYPE_INT, 4, NULL, },
 	{ 220, reg_config_net_nn, file_reg_config_net, reg_config_net_wifi, "wpa_key", KEY_TYPE_STR, 65, NULL, },
@@ -52,7 +53,7 @@ struct Registry_Entry template_wlan_reg_entries[] = {
 	{ reg_id_http_proxy_port, reg_config_net_nn, file_reg_config_net, reg_config_net_app, "http_proxy_port", KEY_TYPE_INT, 4, NULL, },
 	{ 234, reg_config_net_nn, file_reg_config_net, reg_config_net_app, "http_proxy_server", KEY_TYPE_STR, 256, NULL, },
 	{ 208, reg_config_net_nn, file_reg_config_net, reg_config_net_common, "conf_flag", KEY_TYPE_INT, 4, NULL, },
-	{ 210, reg_config_net_nn, file_reg_config_net, reg_config_net_common, "conf_name", KEY_TYPE_STR, 65, NULL, },
+	{ reg_id_conf_name, reg_config_net_nn, NULL, reg_config_net_common, "conf_name", KEY_TYPE_STR, 65, NULL, },
 	{ 211, reg_config_net_nn, file_reg_config_net, reg_config_net_common, "conf_serial_no", KEY_TYPE_INT, 4, NULL, },
 	{ 209, reg_config_net_nn, file_reg_config_net, reg_config_net_common, "conf_type", KEY_TYPE_INT, 4, NULL, },
 	{ 214, reg_config_net_nn, file_reg_config_net, reg_config_net_common, "device", KEY_TYPE_INT, 4, NULL, },
@@ -78,6 +79,7 @@ struct Registry_Data template_wlan_reg_data = {
 	.idx_username = -1,
 	.idx_login_id = -1,
 	.idx_ssid = -1,
+	.idx_conf_name = -1,
 };
 
 struct Registry_Data *initial_wlan_reg_data;
@@ -342,7 +344,7 @@ void save_wlan_details(struct Wlan_Data *wlan_data, char *title)
 					printf("Saving WLAN details to %s...\e[0K\n", base_path);
 
 					// save wlan registry data
-					save_reg_data(base_path, reg_data, reg_id_ssid);
+					save_reg_data(base_path, reg_data);
 
 					printf("WLAN %s (reg #%02i) saved!\e[0K\n", (char *)(reg_data->reg_entries[reg_data->idx_ssid].key_value), j+1);
 					wait_for_cancel_button();
@@ -370,7 +372,7 @@ void read_wlan_details(struct Registry_Data *reg_data, struct Registry_Data *reg
 	printf("Reading WLAN details from %s...\e[0K\n", base_path);
 
 	// load wlan registry data
-	load_reg_data(base_path, reg_data, reg_init_data, reg_id_ssid);
+	load_reg_data(base_path, reg_data, reg_init_data, reg_id_ssid, reg_id_conf_name);
 
 	return;
 }
@@ -576,8 +578,9 @@ void load_wlan_details(struct Wlan_Data *wlan_data, char *title)
 					// initialize data for wlan to be added/updated
 					reg_new_data = NULL;
 					init_reg_data(&reg_new_data, &template_wlan_reg_data);
-					// copy ssid
+					// copy ssid plus conf_name
 					sceClibStrncpy((char *)(reg_new_data->reg_entries[reg_new_data->idx_ssid].key_value), dirs[i].name, (reg_new_data->reg_entries[reg_new_data->idx_ssid].key_size - 1));
+					sceClibStrncpy((char *)(reg_new_data->reg_entries[reg_new_data->idx_conf_name].key_value), dirs[i].name, (reg_new_data->reg_entries[reg_new_data->idx_conf_name].key_size - 1));
 					// read wlan data
 					read_wlan_details(reg_new_data, initial_wlan_reg_data);
 					// set wlan registry data
@@ -617,8 +620,12 @@ void main_wlan(void)
 		if ((template_wlan_reg_data.idx_ssid < 0) && (template_wlan_reg_data.reg_entries[i].key_id == reg_id_ssid)) {
 			template_wlan_reg_data.idx_ssid = i;
 		}
+		// conf_name
+		if ((template_wlan_reg_data.idx_conf_name < 0) && (template_wlan_reg_data.reg_entries[i].key_id == reg_id_conf_name)) {
+			template_wlan_reg_data.idx_conf_name = i;
+		}
 		// all found?
-		if (template_wlan_reg_data.idx_ssid >= 0) {
+		if ((template_wlan_reg_data.idx_ssid >= 0) && (template_wlan_reg_data.idx_conf_name >= 0)) {
 			break;
 		}
 	}

@@ -103,7 +103,7 @@ void free_reg_data(struct Registry_Data *reg_data)
 	return;
 }
 
-void save_reg_data(const char *const base_path, const struct Registry_Data *const reg_data, const int skip_reg_id)
+void save_reg_data(const char *const base_path, const struct Registry_Data *const reg_data)
 {
 	int size_base_path;
 	char target_path[(MAX_PATH_LENGTH)+1];
@@ -127,9 +127,6 @@ void save_reg_data(const char *const base_path, const struct Registry_Data *cons
 
 	// save all registry data
 	for (i = 0; i < reg_data->reg_count; i++) {
-		if (reg_data->reg_entries[i].key_id == skip_reg_id) {  // do not save special id, already stored in folder name
-			continue;
-		}
 		if ((reg_data->reg_entries[i].key_save_path == NULL) || (reg_data->reg_entries[i].key_name == NULL)) {
 			continue;
 		}
@@ -220,7 +217,7 @@ void set_reg_data(struct Registry_Data *reg_data, int slot)
 	return;
 }
 
-void load_reg_data(const char *const base_path, struct Registry_Data *reg_data, const struct Registry_Data *const reg_init_data, const int skip_reg_id)
+void load_reg_data(const char *const base_path, struct Registry_Data *reg_data, const struct Registry_Data *const reg_init_data, const int skip_reg_id_1, const int skip_reg_id_2)
 {
 	int size_base_path;
 	char source_path[(MAX_PATH_LENGTH)+1];
@@ -244,7 +241,10 @@ void load_reg_data(const char *const base_path, struct Registry_Data *reg_data, 
 
 	// load all registry data
 	for (i = 0; i < reg_data->reg_count; i++) {
-		if (reg_data->reg_entries[i].key_id == skip_reg_id) {  // do not read special id, already stored in reg data from folder name
+		if (reg_data->reg_entries[i].key_id == skip_reg_id_1) {  // do not read special id, already stored in reg data from folder name
+			continue;
+		}
+		if (reg_data->reg_entries[i].key_id == skip_reg_id_2) {  // do not read special id, already stored in reg data from folder name
 			continue;
 		}
 

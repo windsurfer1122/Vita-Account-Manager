@@ -48,7 +48,7 @@ const int reg_id_env = 260;
 
 // values from os0:kd/registry.db0 and https://github.com/devnoname120/RegistryEditorMOD/blob/master/regs.c
 struct Registry_Entry template_account_reg_entries[] = {
-	{ reg_id_username, reg_config_system, file_reg_config_system, NULL, "username", KEY_TYPE_STR, 17, NULL, },
+	{ reg_id_username, reg_config_system, NULL, NULL, "username", KEY_TYPE_STR, 17, NULL, },
 	{ reg_id_login_id, reg_config_np, file_reg_config_np, NULL, "login_id", KEY_TYPE_STR, 65, NULL, },
 	{ 257, reg_config_np, file_reg_config_np, NULL, "account_id", KEY_TYPE_BIN, 8, NULL, },
 	{ 259, reg_config_np, file_reg_config_np, NULL, "password", KEY_TYPE_STR, 31, NULL, },
@@ -70,6 +70,7 @@ struct Registry_Data template_account_reg_data = {
 	.idx_username = -1,
 	.idx_login_id = -1,
 	.idx_ssid = -1,
+	.idx_conf_name = -1,
 };
 
 struct File_Entry template_account_file_entries[] = {
@@ -397,7 +398,7 @@ void save_account_details(struct Registry_Data *reg_data, struct File_Data *file
 	printf("Saving account details to %s...\e[0K\n", base_path);
 
 	// save account registry data
-	save_reg_data(base_path, reg_data, reg_id_username);
+	save_reg_data(base_path, reg_data);
 
 	// save account file data
 	size_base_path = sceClibStrnlen(base_path, (MAX_PATH_LENGTH));
@@ -455,7 +456,7 @@ void read_account_details(struct Registry_Data *reg_data, struct File_Data *file
 	printf("Reading account details from %s...\e[0K\n", base_path);
 
 	// load account registry data
-	load_reg_data(base_path, reg_data, reg_init_data, reg_id_username);
+	load_reg_data(base_path, reg_data, reg_init_data, reg_id_username, -1);
 
 	// load account file data
 	sceClibStrncpy(source_path, base_path, (MAX_PATH_LENGTH));
