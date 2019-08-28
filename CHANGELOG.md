@@ -1,5 +1,8 @@
 # Vita Account Manager - Changelog
 
+## v0.90
+* NEW: Saves and restores WLAN profiles.
+
 ## v0.82
 * NEW: Create accounts folder on startup.
 * FIX: Sanitized some string usages.
