@@ -79,9 +79,6 @@ struct File_Entry template_account_file_entries[] = {
 	{ "ur0:user/00/np/", "ur0/np/", "myprofile.dat", 0, },
 	{ "ur0:user/00/trophy/data/sce_trop/", NULL, "TRPUSER.DAT", 0, },
 	{ "ur0:user/00/trophy/data/sce_trop/sce_pfs/", NULL, "files.db", 0, },
-	{ "ux0:", NULL, "id.dat", 0, },
-	{ "imc0:", NULL, "id.dat", 0, },
-	{ "uma0:", NULL, "id.dat", 0, },
 };
 
 struct File_Data template_account_file_data = {
@@ -90,6 +87,17 @@ struct File_Data template_account_file_data = {
 	.file_entries = template_account_file_entries,
 };
 
+struct File_Entry account_unlink_file_entries[] = {
+	{ "ux0:", NULL, "id.dat", 0, },
+	{ "imc0:", NULL, "id.dat", 0, },
+	{ "uma0:", NULL, "id.dat", 0, },
+};
+
+struct File_Data account_unlink_file_data = {
+	.file_count = sizeof(account_unlink_file_entries) / sizeof(account_unlink_file_entries[0]),
+	.file_size = sizeof(account_unlink_file_entries),
+	.file_entries = account_unlink_file_entries,
+};
 
 void init_account_reg_data(struct Registry_Data **reg_data_ptr)
 {
@@ -182,10 +190,14 @@ void get_current_account_reg_data(struct Registry_Data *reg_data)
 
 void init_account_file_data(struct File_Data *file_data)
 {
-	// copy account template to new file entries array
+	// copy account template to new file entries array + unlink entries
 	sceClibMemcpy((void *)(file_data), (void *)(&template_account_file_data), sizeof(template_account_file_data));
-	file_data->file_entries = (struct File_Entry *)malloc(template_account_file_data.file_size);
+	file_data->file_count += account_unlink_file_data.file_count;
+	file_data->file_size += account_unlink_file_data.file_size;
+	//
+	file_data->file_entries = (struct File_Entry *)malloc(file_data->file_size);
 	sceClibMemcpy((void *)(file_data->file_entries), (void *)(template_account_file_data.file_entries), template_account_file_data.file_size);
+	sceClibMemcpy((void *)(&(file_data->file_entries[template_account_file_data.file_count])), (void *)(account_unlink_file_data.file_entries), account_unlink_file_data.file_size);
 
 	return;
 }
@@ -268,6 +280,22 @@ void set_account_file_data(struct File_Data *file_data, char *username)
 			}
 		}
 	}
+
+	return;
+}
+
+void unlink_all_memory_cards(char *title)
+{
+	// draw title line
+	draw_title_line(title);
+
+	// draw pixel line
+	draw_pixel_line(NULL, NULL);
+
+	set_account_file_data(&account_unlink_file_data, NULL);
+
+	printf("All memory cards unlinked!\e[0K\n");
+	wait_for_cancel_button();
 
 	return;
 }

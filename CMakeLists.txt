@@ -27,10 +27,10 @@ set(VITA_APP_NAME "Vita Account Manager")
 # unique string of developer and Y = a unique number for this app
 set(VITA_TITLEID  "ACTM00003")
 # Optional version string to show in LiveArea's more info screen
-set(VITA_VERSION  "00.90")
+set(VITA_VERSION  "00.91")
 string(REGEX MATCH "[0]*([0-9]+\\..*)"
        VITA_VERSION_APP "${VITA_VERSION}")
-set(VITA_VERSION_APP "${CMAKE_MATCH_1}")
+set(VITA_VERSION_APP "${CMAKE_MATCH_1}-beta1")
 
 ## Flags and includes for building
 # Note that we make sure not to overwrite previous flags

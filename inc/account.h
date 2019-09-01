@@ -41,6 +41,7 @@ void get_current_account_reg_data(struct Registry_Data *reg_data);
 
 void init_account_file_data(struct File_Data *file_data);
 void get_current_account_file_data(struct File_Data *file_data);
+void unlink_all_memory_cards(char *title);
 
 void display_account_details_short(struct Registry_Data *reg_data, int *no_user);
 void display_account_details_full(struct Registry_Data *reg_data, struct File_Data *file_data, char *title);

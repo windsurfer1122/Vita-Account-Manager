@@ -286,6 +286,7 @@ int main(void)
 				if (no_user) { printf("\e[22m"); }
 				printf(" Switch to a saved account.\e[0K\n"); menu_items++;
 				printf(" Remove current account.\e[0K\n"); menu_items++;
+				printf(" Unlink all memory cards.\e[0K\n"); menu_items++;
 				// execution history menu points
 				printf(" Display current execution history details.\e[0K\n"); menu_items++;
 				printf(" Delete current execution history.\e[0K\n"); menu_items++;
@@ -373,33 +374,36 @@ int main(void)
 					reboot = 1;
 				}
 				menu_redraw = 1;
-			} else if (menu_item == 5) {  // display execution history details
+			} else if(menu_item == 5) {  // unlink all memory cards
+				unlink_all_memory_cards("Unlink All Memory Cards");
+				menu_redraw = 1;
+			} else if (menu_item == 6) {  // display execution history details
 				display_execution_history_details(&execution_history_data, "Current Execution History");
 				menu_redraw = 1;
-			} else if (menu_item == 6) {  // delete execution history files
+			} else if (menu_item == 7) {  // delete execution history files
 				delete_execution_history(&execution_history_data, "Delete Execution History");
 				reboot = 1;
 				menu_redraw = 1;
-			} else if (menu_item == 7) {  // write-protect execution history files
+			} else if (menu_item == 8) {  // write-protect execution history files
 				if (execution_history_data.count_protected < execution_history_data.count) {
 					protect_execution_history_files(&execution_history_data, "Protect Execution History");
 					menu_redraw = 1;
 				}
-			} else if (menu_item == 8) {  // unprotect execution history files
+			} else if (menu_item == 9) {  // unprotect execution history files
 				if (execution_history_data.count_protected > 0) {
 					unprotect_execution_history_files(&execution_history_data, "Unprotect Execution History");
 					menu_redraw = 1;
 				}
-			} else if (menu_item == 9) {  // save console details
+			} else if (menu_item == 10) {  // save console details
 				save_console_details("Saving console details");
 				menu_redraw = 1;
-			} else if (menu_item == 10) {  // save wlan details
+			} else if (menu_item == 11) {  // save wlan details
 				get_current_wlan_data(&current_wlan_data);
 				if (current_wlan_data.wlan_found > 0) {
 					save_wlan_details(&current_wlan_data, "Saving WLAN details");
 				}
 				menu_redraw = 1;
-			} else if (menu_item == 11) {  // load wlan details
+			} else if (menu_item == 12) {  // load wlan details
 				get_current_wlan_data(&current_wlan_data);
 				load_wlan_details(&current_wlan_data, "Loading WLAN details");
 				menu_redraw = 1;
