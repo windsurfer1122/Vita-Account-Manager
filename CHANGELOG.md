@@ -1,5 +1,8 @@
 # Vita Account Manager - Changelog
 
+## v0.91
+* NEW: Separate function to unlink all memory cards (ux0, imc0, uma0).
+
 ## v0.90
 * NEW: Saves and restores WLAN profiles.
 

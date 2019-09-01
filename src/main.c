@@ -375,37 +375,37 @@ int main(void)
 				}
 				menu_redraw = 1;
 			} else if(menu_item == 5) {  // unlink all memory cards
-				unlink_all_memory_cards("Unlink All Memory Cards");
+				unlink_all_memory_cards("Unlinking All Memory Cards");
 				menu_redraw = 1;
 			} else if (menu_item == 6) {  // display execution history details
 				display_execution_history_details(&execution_history_data, "Current Execution History");
 				menu_redraw = 1;
 			} else if (menu_item == 7) {  // delete execution history files
-				delete_execution_history(&execution_history_data, "Delete Execution History");
+				delete_execution_history(&execution_history_data, "Deleting Execution History");
 				reboot = 1;
 				menu_redraw = 1;
 			} else if (menu_item == 8) {  // write-protect execution history files
 				if (execution_history_data.count_protected < execution_history_data.count) {
-					protect_execution_history_files(&execution_history_data, "Protect Execution History");
+					protect_execution_history_files(&execution_history_data, "Protecting Execution History");
 					menu_redraw = 1;
 				}
 			} else if (menu_item == 9) {  // unprotect execution history files
 				if (execution_history_data.count_protected > 0) {
-					unprotect_execution_history_files(&execution_history_data, "Unprotect Execution History");
+					unprotect_execution_history_files(&execution_history_data, "Unprotecting Execution History");
 					menu_redraw = 1;
 				}
 			} else if (menu_item == 10) {  // save console details
-				save_console_details("Saving console details");
+				save_console_details("Saving Console Details");
 				menu_redraw = 1;
 			} else if (menu_item == 11) {  // save wlan details
 				get_current_wlan_data(&current_wlan_data);
 				if (current_wlan_data.wlan_found > 0) {
-					save_wlan_details(&current_wlan_data, "Saving WLAN details");
+					save_wlan_details(&current_wlan_data, "Save WLAN Details");
 				}
 				menu_redraw = 1;
 			} else if (menu_item == 12) {  // load wlan details
 				get_current_wlan_data(&current_wlan_data);
-				load_wlan_details(&current_wlan_data, "Loading WLAN details");
+				load_wlan_details(&current_wlan_data, "Load WLAN Details");
 				menu_redraw = 1;
 			}
 		}

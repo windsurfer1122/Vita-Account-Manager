@@ -30,7 +30,7 @@ set(VITA_TITLEID  "ACTM00003")
 set(VITA_VERSION  "00.91")
 string(REGEX MATCH "[0]*([0-9]+\\..*)"
        VITA_VERSION_APP "${VITA_VERSION}")
-set(VITA_VERSION_APP "${CMAKE_MATCH_1}-beta1")
+set(VITA_VERSION_APP "${CMAKE_MATCH_1}")
 
 ## Flags and includes for building
 # Note that we make sure not to overwrite previous flags
